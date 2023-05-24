@@ -9,9 +9,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
 #include <ncurses.h>
 
+#define KEY_COMBO_CTRL_D 4
+#define CTRL_D_STEP 3
 
 struct RomStruct {
     short id{};

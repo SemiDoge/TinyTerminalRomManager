@@ -7,6 +7,7 @@ bool bExitFlag = false;
 #define DEBUG
 
 //TODO: Need to implement scanner invokable via cmd, consider adding CXXOPTS dependency
+//TODO: Search/Filtering option
 int main() {
     #ifdef RELEASE
     std::string path = expandTilde("~/.config/romManager/roms.yaml");
@@ -64,7 +65,11 @@ int main() {
                 startEmulator(roms[currentOption]);
                 bExitFlag = true;
                 break;
-            case 'q' | 'Q':
+            case KEY_COMBO_CTRL_D:
+                currentOption = (currentOption + CTRL_D_STEP + numOptions) % numOptions;
+                break;
+            case 'Q':
+            case 'q':
                 bExitFlag = true;
                 break;
 
