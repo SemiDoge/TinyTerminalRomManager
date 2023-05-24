@@ -4,9 +4,15 @@
 #include "../inc/window.h"
 
 bool bExitFlag = false;
+#define DEBUG
 
+//TODO: Need to implement scanner invokable via cmd, consider adding CXXOPTS dependency
 int main() {
+    #ifdef RELEASE
+    std::string path = expandTilde("~/.config/romManager/roms.yaml");
+    #elif defined(DEBUG)
     std::string path = "../config/roms.yaml";
+    #endif
     Logger::setAllowedToPrint(true);
 
     std::vector<Rom> roms{};
@@ -102,9 +108,9 @@ std::string expandTilde(const std::string& path) {
     const char* homeDir = std::getenv("HOME");
 
     if (homeDir) {
-        expandedPath = homeDir + path.substr(1);
+        expandedPath = fmt::format("{}{}", homeDir, path.substr(1));
     } else {
-        expandedPath = "/home/username" + path.substr(1);
+        expandedPath = fmt::format("/home/username{}", homeDir, path.substr(1));
     }
 
     return expandedPath;
