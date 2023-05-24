@@ -10,6 +10,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <ncurses.h>
+
+
 struct RomStruct {
     short id{};
     std::string name;
@@ -20,8 +23,7 @@ struct RomStruct {
 
 using Rom = RomStruct;
 
-//TODO: For a GUI, let's use ncurses
-//TODO: Write function that writes to the config file
+void initWindow();
 void printRoms(std::vector<Rom>& roms);
 void startEmulator(Rom rom);
 std::string expandTilde(const std::string& path);

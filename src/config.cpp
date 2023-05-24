@@ -1,6 +1,7 @@
 #include "../inc/config.h"
 
 
+// TODO: Complete this function, that will basically be a scanner for roms in a directory
 void writeRomToConfig(Rom rom) {
     assert("Unimplemented");
 }

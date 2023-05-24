@@ -1,6 +1,9 @@
 #include "../inc/main.h"
 #include "../inc/logging.h"
 #include "../inc/config.h"
+#include "../inc/window.h"
+
+bool bExitFlag = false;
 
 int main() {
     std::string path = "../config/roms.yaml";
@@ -16,17 +19,72 @@ int main() {
         return -1;
     }
 
-    Logger::log(fmt::format("Loaded config file: {}", path), logSeverity::INFO);
-    printRoms(roms);
-    Logger::log(fmt::format("Now playing: {}\n", roms[0].name), logSeverity::INFO);
-    startEmulator(roms[0]);
-    
+    ctx context;
+    context.roms = roms;
+
+    initWindow();
+
+    int currentOption = 0;
+    int numOptions = context.roms.size();
+
+    // Main menu loop
+    while (true) {
+        clear();
+
+        mvprintw(0, 1, "ROMS");
+
+        // Display menu options
+        for (int i = 0; i < numOptions; ++i) {
+            if (i == currentOption) {
+                attron(A_REVERSE); // Highlight the currently selected option
+            }
+
+            std::string romString = fmt::format("[{}] {} via {}", context.roms[i].type, context.roms[i].name, context.roms[i].emulator).c_str();
+            mvprintw(i + 1, 1, "%s", romString.c_str());
+            attroff(A_REVERSE);
+        }
+
+
+        // Get user input
+        int ch = getch();
+        switch (ch) {
+            case KEY_UP:
+                currentOption = (currentOption - 1 + numOptions) % numOptions;
+                break;
+            case KEY_DOWN:
+                currentOption = (currentOption + 1) % numOptions;
+                break;
+            case '\n':
+                startEmulator(roms[currentOption]);
+                bExitFlag = true;
+                break;
+            case 'q' | 'Q':
+                bExitFlag = true;
+                break;
+
+        }
+
+        if (bExitFlag == true) {
+            break;
+        }
+    }
+
+    // Cleanup and exit
+    endwin();
+       
     return 0;
 }
 
+void initWindow() {
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0);
 
+    return;
+}
 
-//TODO: Build a system that assign's ID's to all of the roms and allows you to enter an ID to start the game
 void printRoms(std::vector<Rom>& roms) {
     for (const auto& rom : roms) {
         fmt::print("{:02X}: {} via {} ({})\n", rom.id, rom.name, rom.emulator, rom.type);
