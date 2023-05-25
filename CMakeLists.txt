@@ -13,6 +13,8 @@ include(cmake/CPM.cmake)
 
 CPMAddPackage("gh:fmtlib/fmt#10.0.0")
 CPMAddPackage("gh:jbeder/yaml-cpp#yaml-cpp-0.7.0")
+CPMAddPackage("gh:jarro2783/cxxopts@3.1.1")
+
 
 #variables
 set (SOURCES 

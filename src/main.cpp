@@ -1,10 +1,19 @@
 #include "../inc/main.h"
 #include "../inc/logging.h"
 #include "../inc/config.h"
-#include "../inc/window.h"
 
 bool bExitFlag = false;
 #define DEBUG
+
+
+// int main() {
+//     // std::string path = "../config/emus.yaml";
+//     std::vector<Rom> roms{};
+
+//     writeDirToRomConfig(roms, expandTilde("~/RomManager/"));
+//     writeRomConfigToFile(roms, "../config/test.yaml");
+
+// }
 
 //TODO: Need to implement scanner invokable via cmd, consider adding CXXOPTS dependency
 //TODO: Search/Filtering option
@@ -12,33 +21,53 @@ int main() {
     #ifdef RELEASE
     std::string path = expandTilde("~/.config/romManager/roms.yaml");
     #elif defined(DEBUG)
-    std::string path = "../config/roms.yaml";
+    // std::string path = "../config/roms-original.yaml";
+    std::string path = "../config/test.yaml";
     #endif
     Logger::setAllowedToPrint(true);
 
     std::vector<Rom> roms{};
+    std::vector<Emu> emus{};
 
     try {
         roms = loadRomsFromConfig(path);
     }
     catch(YAML::BadFile& error) {
-        Logger::log(fmt::format("Could not load config file, reason: {}", error.msg), logSeverity::ERROR);
+        Logger::log(fmt::format("Could not load rom config file, reason: {}", error.msg), logSeverity::ERROR);
         return -1;
     }
 
-    ctx context;
-    context.roms = roms;
+    // try {
+    //     emus = loadEmusFromConfig(path);
+    // }
+    // catch(YAML::InvalidNode& error) {
+    //      Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+    //      return -1;
+    // }
+    // catch(YAML::BadFile& error) {
+    //     Logger::log(fmt::format("Could not load emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+    //     return -1;
+    // }
 
     initWindow();
 
     int currentOption = 0;
-    int numOptions = context.roms.size();
+    int numOptions = roms.size();
+    // TODO: Make a slide-able 'view' that responds to the max viewable size of the window.
+    int visibleNumLines, numCols;
+    (void) numCols;
+
+    if (numOptions == 0) {
+        Logger::log("Config file empty!\n", logSeverity::ERROR);
+        return -1;
+    }
 
     // Main menu loop
     while (true) {
         clear();
 
-        mvprintw(0, 1, "ROMS");
+        getmaxyx(stdscr, visibleNumLines, numCols);
+        mvprintw(0, 1, "ROMS: %d", numOptions);
 
         // Display menu options
         for (int i = 0; i < numOptions; ++i) {
@@ -46,7 +75,7 @@ int main() {
                 attron(A_REVERSE); // Highlight the currently selected option
             }
 
-            std::string romString = fmt::format("[{}] {} via {}", context.roms[i].type, context.roms[i].name, context.roms[i].emulator).c_str();
+            std::string romString = fmt::format("[{}] {} via {}", roms[i].type, roms[i].name, roms[i].emulator).c_str();
             mvprintw(i + 1, 1, "%s", romString.c_str());
             attroff(A_REVERSE);
         }
@@ -64,6 +93,9 @@ int main() {
             case '\n':
                 startEmulator(roms[currentOption]);
                 bExitFlag = true;
+                break;
+            case KEY_COMBO_CTRL_U:
+                currentOption = (currentOption - CTRL_D_STEP + numOptions) % numOptions;
                 break;
             case KEY_COMBO_CTRL_D:
                 currentOption = (currentOption + CTRL_D_STEP + numOptions) % numOptions;
