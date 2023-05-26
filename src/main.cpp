@@ -1,6 +1,7 @@
 #include "../inc/main.h"
 #include "../inc/logging.h"
 #include "../inc/config.h"
+#include "../inc/vecview.h"
 
 bool bExitFlag = false;
 #define DEBUG
@@ -26,12 +27,39 @@ std::vector<Rom> index(std::string dir) {
     return roms;
 }
 
+int main() {
+    Logger::setAllowedToPrint(true);
+    std::vector<Rom> roms{};
+    roms = index("~/RomManager/");
+
+    auto subView = VecView(roms, 0, 5);
+
+    int index = 0;
+    for (const auto& rom : subView) {
+        Logger::log(fmt::format("subView[{}] = {}", index, rom.name), logSeverity::INFO);
+        index++;
+    }
+
+    fmt::println("---------------");
+
+    index = 0;
+    subView = VecView(roms, 2, 3);
+    for (const auto& rom : subView) {
+        Logger::log(fmt::format("subView[{}] = {}", index, rom.name), logSeverity::INFO);
+        index++;
+    }
+
+
+
+    return 0;
+}
+
 //TODO: Need to implement scanner invokable via cmd, consider adding CXXOPTS dependency
 //TODO: Search/Filtering option
 //TODO: Save file management? After above stuff is finished
 //TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired...
 //folder
-int main(int argc, char** argv) {
+int main2(int argc, char** argv) {
     Logger::setAllowedToPrint(true);
     cxxopts::Options options("romManager", "Hello, world!");
     auto optRes = setUpWorkflow(argc, argv, options);
@@ -45,7 +73,6 @@ int main(int argc, char** argv) {
     std::vector<Rom> roms{};
     std::vector<Emu> emus{};
 
-    
 
     // try {
     //     emus = loadEmusFromConfig(path);
@@ -156,7 +183,7 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
     }
 
     if (result.count("index")) {
-        std::string dirToIndex =  expandTilde("~/RomManager/");
+        std::string dirToIndex =  expandTilde("~/AllRoms/");
 
         Logger::log(fmt::format("Indexing: {}", dirToIndex), logSeverity::INFO);
         auto ret = index(dirToIndex);
