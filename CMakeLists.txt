@@ -26,6 +26,7 @@ set (SOURCES
 set (DEPS 
     fmt::fmt
     yaml-cpp::yaml-cpp
+    cxxopts::cxxopts
 )
 
 set (LINKER_FLAGS

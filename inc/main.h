@@ -38,7 +38,6 @@ struct RomStruct {
 
 using Rom = RomStruct;
 
-void initWindow();
 void printRoms(std::vector<Rom>& roms);
 void startEmulator(Rom rom);
 std::string expandTilde(const std::string& path);
