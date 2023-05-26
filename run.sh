@@ -1,2 +1,10 @@
+#! /bin/bash
+
 cd build
-./romManager
+
+if [ -z "$1" ]
+then
+    ./romManager
+else
+    ./romManager $1
+fi

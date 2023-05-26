@@ -1,3 +1,5 @@
+#! /bin/bash
+
 set -xe
 sed -i 's/#define DEBUG/#define RELEASE/' src/main.cpp
 ./build.sh
