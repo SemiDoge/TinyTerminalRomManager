@@ -16,10 +16,15 @@ void Menu::OnInit() {
     noecho();
     keypad(stdscr, TRUE);
     curs_set(0);
+
+    // init mouse scroll wheels
+    mmask_t mask = BUTTON4_PRESSED | BUTTON5_PRESSED;
+    mousemask(mask, NULL);
 }
 
 void Menu::OnExecute() {
     int ch;
+    MEVENT mEvent;
     while (bRunning) {
         OnRender();
         ch = getch();
@@ -35,6 +40,17 @@ void Menu::OnExecute() {
                 break;
             case KEY_COMBO_CTRL_D:
                 ScrollDown(CTRL_D_STEP);
+                break;
+            case KEY_MOUSE:
+                if (getmouse(&mEvent) == OK) {
+                    if (mEvent.bstate & BUTTON4_PRESSED) {
+                        ScrollUp(UP_ARROW_STEP);
+                        break;
+                    } else if (mEvent.bstate & BUTTON5_PRESSED) {
+                        ScrollDown(DOWN_ARROW_STEP);
+                        break;
+                    }
+                }
                 break;
             case '\n':
                 startEmulator(menu_items[scroll_offset]);
