@@ -1,7 +1,6 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-
 #include <fmt/format.h>
 #include <fmt/color.h>
 

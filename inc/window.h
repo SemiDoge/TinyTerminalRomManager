@@ -5,15 +5,11 @@
 #include <string>
 #include <iostream>
 #include <ncurses.h>
-#include "../inc/main.h"
+#include <fmt/format.h>
 
-#define NUM_NON_ENTRY_LINES 1
-#define KEY_COMBO_CTRL_U  21
-#define KEY_COMBO_CTRL_D  4
-#define CTRL_U_STEP       15
-#define CTRL_D_STEP       15
-#define UP_ARROW_STEP     1
-#define DOWN_ARROW_STEP   1
+#include "../inc/main.h"
+#include "../inc/constants.h"
+#include "../inc/structs.h"
 
 class Menu {
 private:

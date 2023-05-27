@@ -5,34 +5,14 @@
 #include <fmt/color.h>
 #include <vector>
 #include <iostream>
-
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <cxxopts.hpp>
 #include <ncurses.h>
-#include <yaml-cpp/yaml.h>
 
-
-struct RomStruct {
-    short id{};
-    std::string name;
-    std::string filename;
-    std::string type;
-    std::string emulator;
-
-    friend YAML::Emitter& operator<<(YAML::Emitter& out, const RomStruct& rom) {
-        out << YAML::BeginMap;
-        out << YAML::Key << "name" << YAML::Value << rom.name;
-        out << YAML::Key << "filename" << YAML::Value << rom.filename;
-        out << YAML::Key << "type" << YAML::Value << rom.type;
-        out << YAML::Key << "emulator" << YAML::Value << rom.emulator;
-        out << YAML::EndMap;
-
-        return out;
-    }
-};
-
-using Rom = RomStruct;
+#include "../inc/logging.h"
+#include "../inc/config.h"
+#include "../inc/window.h"
+#include "../inc/structs.h"
+#include "../inc/constants.h"
 
 void printRoms(std::vector<Rom>& roms);
 void startEmulator(Rom rom);

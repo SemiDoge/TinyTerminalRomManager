@@ -1,8 +1,6 @@
 #include "../inc/config.h"
 #include "../inc/logging.h"
-
-
-#include <iostream>
+#include "../inc/constants.h"
 
 void writeDirToRomConfig(std::vector<Rom>& roms, std::string path) {
 
@@ -113,4 +111,35 @@ std::vector<Rom> loadRomsFromConfig(std::string fileName) {
     }
 
     return roms;
+}
+
+std::vector<Rom> index(std::string dir) {
+    std::vector<Rom> roms{};
+
+    writeDirToRomConfig(roms, expandTilde(dir));
+
+    #ifdef RELEASE
+    writeRomConfigToFile(roms, "~/.config/romManager/roms.yaml");
+    #elif defined(DEBUG)
+    writeRomConfigToFile(roms, "../config/test.yaml");
+    #endif
+
+    return roms;
+}
+
+std::string expandTilde(const std::string& path) {
+    if (path.empty() || path[0] != '~') {
+        return path;
+    }
+
+    std::string expandedPath;
+    const char* homeDir = std::getenv("HOME");
+
+    if (homeDir) {
+        expandedPath = fmt::format("{}{}", homeDir, path.substr(1));
+    } else {
+        expandedPath = fmt::format("/home/username{}", homeDir, path.substr(1));
+    }
+
+    return expandedPath;
 }

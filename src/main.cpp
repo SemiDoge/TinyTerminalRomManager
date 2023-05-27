@@ -1,30 +1,7 @@
 #include "../inc/main.h"
-#include "../inc/logging.h"
-#include "../inc/config.h"
-#include "../inc/window.h"
-
-#define DEBUG
-
-#include <cxxopts.hpp>
 
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options);
 void printVersion();
-void initWindow();
-std::vector<Rom> index(std::string dir);
-
-std::vector<Rom> index(std::string dir) {
-    std::vector<Rom> roms{};
-
-    writeDirToRomConfig(roms, expandTilde(dir));
-
-    #ifdef RELEASE
-    writeRomConfigToFile(roms, "~/.config/romManager/roms.yaml");
-    #elif defined(DEBUG)
-    writeRomConfigToFile(roms, "../config/test.yaml");
-    #endif
-
-    return roms;
-}
 
 //TODO: Search/Filtering option
 //TODO: Save file management? After above stuff is finished
@@ -69,12 +46,12 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    Menu menu(15, 90, 0, 0, roms);
+    Menu menu(roms.size(), 90, 0, 0, roms);
     menu.OnInit();
     menu.OnExecute();
     menu.OnCleanup();
        
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options) {
@@ -110,7 +87,11 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 }
 
 void printVersion() {
-    fmt::print("romManager VERSION {}\n", fmt::styled("0.12", fmt::fg(fmt::color::orange)));
+    fmt::print("romManager VERSION {}.{}.{}\n", 
+        fmt::styled(__VER__MAJOR__, fmt::fg(fmt::color::orange)),
+        fmt::styled(__VER__MINOR__, fmt::fg(fmt::color::orange)),
+        fmt::styled(__VER__PATCH__, fmt::fg(fmt::color::orange))
+    );
 }
 
 void printRoms(std::vector<Rom>& roms) {
@@ -119,23 +100,6 @@ void printRoms(std::vector<Rom>& roms) {
     }
 
     return;
-}
-
-std::string expandTilde(const std::string& path) {
-    if (path.empty() || path[0] != '~') {
-        return path;
-    }
-
-    std::string expandedPath;
-    const char* homeDir = std::getenv("HOME");
-
-    if (homeDir) {
-        expandedPath = fmt::format("{}{}", homeDir, path.substr(1));
-    } else {
-        expandedPath = fmt::format("/home/username{}", homeDir, path.substr(1));
-    }
-
-    return expandedPath;
 }
 
 void startEmulator(Rom rom) {
