@@ -12,10 +12,6 @@
 #include <ncurses.h>
 #include <yaml-cpp/yaml.h>
 
-#define KEY_COMBO_CTRL_U 21
-#define KEY_COMBO_CTRL_D 4
-
-#define CTRL_D_STEP 3
 
 struct RomStruct {
     short id{};

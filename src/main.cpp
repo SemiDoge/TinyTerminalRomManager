@@ -1,9 +1,8 @@
 #include "../inc/main.h"
 #include "../inc/logging.h"
 #include "../inc/config.h"
-#include "../inc/vecview.h"
+#include "../inc/window.h"
 
-bool bExitFlag = false;
 #define DEBUG
 
 #include <cxxopts.hpp>
@@ -27,46 +26,17 @@ std::vector<Rom> index(std::string dir) {
     return roms;
 }
 
-int main() {
-    Logger::setAllowedToPrint(true);
-    std::vector<Rom> roms{};
-    roms = index("~/RomManager/");
-
-    auto subView = VecView(roms, 0, 5);
-
-    int index = 0;
-    for (const auto& rom : subView) {
-        Logger::log(fmt::format("subView[{}] = {}", index, rom.name), logSeverity::INFO);
-        index++;
-    }
-
-    fmt::println("---------------");
-
-    index = 0;
-    subView = VecView(roms, 2, 3);
-    for (const auto& rom : subView) {
-        Logger::log(fmt::format("subView[{}] = {}", index, rom.name), logSeverity::INFO);
-        index++;
-    }
-
-
-
-    return 0;
-}
-
-//TODO: Need to implement scanner invokable via cmd, consider adding CXXOPTS dependency
 //TODO: Search/Filtering option
 //TODO: Save file management? After above stuff is finished
-//TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired...
-//folder
-int main2(int argc, char** argv) {
+//TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
+int main(int argc, char** argv) {
     Logger::setAllowedToPrint(true);
-    cxxopts::Options options("romManager", "Hello, world!");
+    cxxopts::Options options("romManager", "A simple ncurses driven rom manager, for all your emulation needs!\nPlease only use this tool with legally obtained roms.");
     auto optRes = setUpWorkflow(argc, argv, options);
+
     #ifdef RELEASE
     std::string path = expandTilde("~/.config/romManager/roms.yaml");
     #elif defined(DEBUG)
-    // std::string path = "../config/roms-original.yaml";
     std::string path = "../config/test.yaml";
     #endif
 
@@ -94,71 +64,15 @@ int main2(int argc, char** argv) {
         return -1;
     }
 
-    initWindow();
-
-    int currentOption = 0;
-    int numOptions = roms.size();
-    // TODO: Make a slide-able 'view' that responds to the max viewable size of the window.
-    int visibleNumLines, numCols;
-    (void) numCols;
-
-    if (numOptions == 0) {
+    if (roms.size() == 0) {
         Logger::log("Config file empty!\n", logSeverity::ERROR);
         return -1;
     }
 
-    // Main menu loop
-    while (true) {
-        clear();
-
-        getmaxyx(stdscr, visibleNumLines, numCols);
-        mvprintw(0, 1, "ROMS: %d", numOptions);
-
-        // Display menu options
-        for (int i = 0; i < numOptions; ++i) {
-            if (i == currentOption) {
-                attron(A_REVERSE); // Highlight the currently selected option
-            }
-
-            std::string romString = fmt::format("[{}] {} via {}", roms[i].type, roms[i].name, roms[i].emulator).c_str();
-            mvprintw(i + 1, 1, "%s", romString.c_str());
-            attroff(A_REVERSE);
-        }
-
-
-        // Get user input
-        int ch = getch();
-        switch (ch) {
-            case KEY_UP:
-                currentOption = (currentOption - 1 + numOptions) % numOptions;
-                break;
-            case KEY_DOWN:
-                currentOption = (currentOption + 1) % numOptions;
-                break;
-            case '\n':
-                startEmulator(roms[currentOption]);
-                bExitFlag = true;
-                break;
-            case KEY_COMBO_CTRL_U:
-                currentOption = (currentOption - CTRL_D_STEP + numOptions) % numOptions;
-                break;
-            case KEY_COMBO_CTRL_D:
-                currentOption = (currentOption + CTRL_D_STEP + numOptions) % numOptions;
-                break;
-            case 'Q':
-            case 'q':
-                bExitFlag = true;
-                break;
-
-        }
-
-        if (bExitFlag == true) {
-            break;
-        }
-    }
-
-    // Cleanup and exit
-    endwin();
+    Menu menu(15, 90, 0, 0, roms);
+    menu.OnInit();
+    menu.OnExecute();
+    menu.OnCleanup();
        
     return 0;
 }
@@ -193,16 +107,6 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
     }
 
     return result;
-}
-
-void initWindow() {
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-    curs_set(0);
-
-    return;
 }
 
 void printVersion() {
