@@ -12,7 +12,12 @@ int main(int argc, char** argv) {
     cxxopts::Options options("romManager", 
         "A simple ncurses driven ROM manager, for all your emulation needs!\nPlease use this tool with only legally obtained ROMS."
     );
-    auto optRes = setUpWorkflow(argc, argv, options);
+    try {
+        auto optRes = setUpWorkflow(argc, argv, options);
+    } catch (cxxopts::exceptions::missing_argument error) {
+        Logger::log(fmt::format("{}", error.what()), logSeverity::ERROR);
+        return -1;
+    }
 
     #ifdef RELEASE
     std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
@@ -30,8 +35,8 @@ int main(int argc, char** argv) {
         emus = loadEmusFromConfig(emuPath);
     }
     catch(YAML::InvalidNode& error) {
-         Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
-         return -1;
+        Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+        return -1;
     }
     catch(YAML::BadFile& error) {
         Logger::log(fmt::format("Could not load emulator config file, reason: {}", error.msg), logSeverity::ERROR);
@@ -61,7 +66,7 @@ int main(int argc, char** argv) {
 
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options) {
    options.add_options()
-        ("i,index", "INDEX Rom directory")
+        ("i,index", "INDEX Rom directory", cxxopts::value<std::string>())
         ("v,version", "PRINT program version")
         ("h,help", "PRINT help text")
     ; 
@@ -100,7 +105,7 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
             exit(-1);
         }
 
-        std::string dirToIndex =  expandTilde("~/RomManager/");
+        std::string dirToIndex = result["index"].as<std::string>();
 
         Logger::log(fmt::format("Indexing: {}", dirToIndex), logSeverity::INFO);
         auto ret = index(emus, dirToIndex);
