@@ -19,6 +19,7 @@ private:
     int start_col;
     int scroll_offset;
     std::vector<Rom> menu_items;
+    std::vector<Emu> emus;
     bool bRunning;
 
     void OnRender();
@@ -26,7 +27,8 @@ private:
     void ScrollDown(int step);
 
 public:
-    Menu(int height, int width, int start_row, int start_col, const std::vector<Rom>& items);
+    Menu(int height, int width, int start_row, int start_col, const std::vector<Rom>& items, const std::vector<Emu>& emus);
+
     void OnInit();
     void OnExecute();
     void OnCleanup();

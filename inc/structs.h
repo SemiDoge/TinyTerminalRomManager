@@ -10,14 +10,16 @@ struct EmuStruct {
     std::string name;
     std::string filename;
     std::vector<std::string> typeAssoc;
-    std::string emulator;
+    std::string type;
+    std::vector<std::string> args;
 
     friend YAML::Emitter& operator<<(YAML::Emitter& out, const EmuStruct& emu) {
         out << YAML::BeginMap;
         out << YAML::Key << "name" << YAML::Value << emu.name;
         out << YAML::Key << "extension" << YAML::Value << emu.typeAssoc;
-        out << YAML::Key << "type" << YAML::Value << emu.emulator;
+        out << YAML::Key << "type" << YAML::Value << emu.type;
         out << YAML::Key << "path" << YAML::Value << emu.filename;
+        out << YAML::Key << "args" << YAML::Value << emu.args;
         out << YAML::EndMap;
 
         return out;

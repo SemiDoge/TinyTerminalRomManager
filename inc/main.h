@@ -15,7 +15,8 @@
 #include "../inc/constants.h"
 
 void printRoms(std::vector<Rom>& roms);
-void startEmulator(Rom rom);
+void startEmulator(Emu emu, Rom rom);
 std::string expandTilde(const std::string& path);
+Emu chooseEmu(std::vector<Emu> emus, std::string path);
 
 #endif

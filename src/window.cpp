@@ -1,12 +1,15 @@
 #include "../inc/window.h"
 
-Menu::Menu(int height, int width, int start_row, int start_col, const std::vector<Rom>& items) {
+Menu::Menu(int height, int width, int start_row, int start_col,
+    const std::vector<Rom>& items, const std::vector<Emu>& emus) 
+{
     this->menu_height = height;
     this->menu_width = width;
     this->start_row = start_row;
     this->start_col = start_col;
     this->scroll_offset = 0;
     this->menu_items = items;
+    this->emus = emus;
     this->bRunning = true;
 }
 
@@ -24,6 +27,7 @@ void Menu::OnInit() {
 
 void Menu::OnExecute() {
     int ch;
+    Emu emu;
     MEVENT mEvent;
     while (bRunning) {
         OnRender();
@@ -53,7 +57,8 @@ void Menu::OnExecute() {
                 }
                 break;
             case '\n':
-                startEmulator(menu_items[scroll_offset]);
+                emu = chooseEmu(emus, menu_items[scroll_offset].emulator);
+                startEmulator(emu, menu_items[scroll_offset]);
                 bRunning = false;
                 break;
             case '/':

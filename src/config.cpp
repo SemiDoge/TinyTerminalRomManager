@@ -2,7 +2,7 @@
 #include "../inc/logging.h"
 #include "../inc/constants.h"
 
-void writeDirToRomConfig(std::vector<Rom>& roms, std::string path) {
+void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
 
     fs::path dirPath = path;
 
@@ -11,10 +11,9 @@ void writeDirToRomConfig(std::vector<Rom>& roms, std::string path) {
             const fs::path filePath = file.path();
             const std::string extension = toUpper(extractExtension(filePath));
 
-            if(extension == "GBA") {
-                // std::string fp = fmt::format("{}{}", dirPath, filePath);
+            if(extension != "SAV") {
                 std::string fullPath = fmt::format("{}{}", path, filePath.filename().c_str());
-                writeRomToConfig(roms, fullPath);
+                writeRomToConfig(emus, roms, fullPath);
             }
         }
     }
@@ -31,7 +30,7 @@ std::string toUpper(std::string str) {
     return str;
 }
 
-void writeRomToConfig(std::vector<Rom>& roms, std::string path) {
+void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
     size_t lastSlash = path.find_last_of("/\\");
     size_t lastDot = path.find_last_of(".");
 
@@ -50,8 +49,7 @@ void writeRomToConfig(std::vector<Rom>& roms, std::string path) {
         .name = romName,
         .filename = path,
         .type = romExt,
-        //TODO: Write an autodetect function that looks up file extension associations in EmuStruct and assigns a emulator P
-        .emulator = "mgba-qt",
+        .emulator = autoDetectEmu(emus, romExt),
     };
 
     roms.push_back(rom);
@@ -77,14 +75,19 @@ std::vector<Emu> loadEmusFromConfig(std::string fileName) {
 
     for (const auto& entry : configFile) {
         Emu newEmu{};
-        newEmu.id = 0;
+        newEmu.id = emu.size();
         newEmu.name = entry["name"].as<std::string>();
-        newEmu.emulator = entry["type"].as<std::string>();
+        newEmu.type = entry["type"].as<std::string>();
         newEmu.filename = entry["path"].as<std::string>();
 
         const YAML::Node& extensionNode = entry["extension"];
         for (const YAML::Node& node : extensionNode) {
             newEmu.typeAssoc.push_back(node.as<std::string>());
+        }
+
+        const YAML::Node& argsNode = entry["args"];
+        for (const YAML::Node& node : argsNode) {
+            newEmu.args.push_back(node.as<std::string>());
         }
 
         emu.push_back(newEmu);
@@ -113,10 +116,10 @@ std::vector<Rom> loadRomsFromConfig(std::string fileName) {
     return roms;
 }
 
-std::vector<Rom> index(std::string dir) {
+std::vector<Rom> index(std::vector<Emu>& emus, std::string dir) {
     std::vector<Rom> roms{};
 
-    writeDirToRomConfig(roms, expandTilde(dir));
+    writeDirToRomConfig(emus, roms, expandTilde(dir));
 
     #ifdef RELEASE
     writeRomConfigToFile(roms, "~/.config/romManager/roms.yaml");
@@ -142,4 +145,17 @@ std::string expandTilde(const std::string& path) {
     }
 
     return expandedPath;
+}
+
+std::string autoDetectEmu(std::vector<Emu>& emus, std::string ext) {
+
+    for(const auto& emu : emus) {
+        for(const auto& ft : emu.typeAssoc) {
+            if (toUpper(ft) == ext) {
+                return emu.filename;
+            }
+        }
+    }
+
+    return "mgba-qt";
 }
