@@ -2,6 +2,7 @@
 #include "../inc/logging.h"
 #include "../inc/constants.h"
 
+//TODO: This will index non ROMs, use the typeAssoc data member in Emu to filter out irrelevant files, see line 15
 void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
 
     fs::path dirPath = path;

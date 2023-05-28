@@ -84,13 +84,17 @@ void Menu::OnRender() {
     for (int i = 0; i < menu_height; i++) {
         int index = i + scroll_offset;
         if (index  == scroll_offset) {
-            attron(A_REVERSE); // Highlight the currently selected option
+            attron(A_REVERSE);
         }
 
         if (index < std::min((int) menu_items.size(), maxyLines+scroll_offset)) {
+            int lastSlash = menu_items[index].emulator.find_last_of("/\\");
+            std::string emuString = menu_items[index].emulator.substr(lastSlash + 1, menu_items[index].emulator.size());
+
             std::string romString = fmt::format("[{}] {} via {}", 
                     menu_items[index].type, menu_items[index].name, 
-                    menu_items[index].emulator
+                    emuString
+                    
             ).c_str();
             mvwprintw(stdscr, i + 1, 0, "%s", romString.c_str());
         } else {

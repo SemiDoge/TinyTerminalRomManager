@@ -20,11 +20,11 @@ int main(int argc, char** argv) {
     }
 
     #ifdef RELEASE
-    std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
-    std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
+        std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
+        std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
     #elif defined(DEBUG)
-    std::string romsPath = "../config/test.yaml";
-    std::string emuPath = "../config/emus.yaml";
+        std::string romsPath = "../config/test.yaml";
+        std::string emuPath = "../config/emus.yaml";
     #endif
 
     std::vector<Rom> roms{};
@@ -33,20 +33,17 @@ int main(int argc, char** argv) {
 
     try {
         emus = loadEmusFromConfig(emuPath);
-    }
-    catch(YAML::InvalidNode& error) {
+    } catch(YAML::InvalidNode& error) {
         Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
         return -1;
-    }
-    catch(YAML::BadFile& error) {
+    } catch(YAML::BadFile& error) {
         Logger::log(fmt::format("Could not load emulator config file, reason: {}", error.msg), logSeverity::ERROR);
         return -1;
     }
 
     try {
         roms = loadRomsFromConfig(romsPath);
-    }
-    catch(YAML::BadFile& error) {
+    } catch(YAML::BadFile& error) {
         Logger::log(fmt::format("Could not load rom config file, reason: {}", error.msg), logSeverity::ERROR);
         return -1;
     }
@@ -95,12 +92,10 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 
         try {
             emus = loadEmusFromConfig(emuPath);
-        }
-        catch(YAML::InvalidNode& error) {
+        } catch(YAML::InvalidNode& error) {
             Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
             exit(-1);
-        }
-        catch(YAML::BadFile& error) {
+        } catch(YAML::BadFile& error) {
             Logger::log(fmt::format("Could not load emulator config file, reason: {}", error.msg), logSeverity::ERROR);
             exit(-1);
         }
@@ -109,6 +104,7 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 
         Logger::log(fmt::format("Indexing: {}", dirToIndex), logSeverity::INFO);
         auto ret = index(emus, dirToIndex);
+
         Logger::log(fmt::format("Finished indexing {}", dirToIndex), logSeverity::INFO);
         Logger::log(fmt::format("Roms found: {}", ret.size()), logSeverity::INFO);
         exit(EXIT_SUCCESS);
