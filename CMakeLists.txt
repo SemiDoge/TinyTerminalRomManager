@@ -5,8 +5,18 @@ project(romManager)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(DEBUG True)
 
-add_compile_options(-Wall -Wpedantic -Wextra)
+# Checking build type
+if (DEBUG)
+    add_compile_options(-Wall -Wpedantic -Wextra)
+else ()
+    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message("Compiling at optimazation level O3")
+        add_compile_options(-O3)
+    endif()
+endif()
+
 
 #add deps
 include(cmake/CPM.cmake)
