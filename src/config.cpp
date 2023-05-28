@@ -17,6 +17,8 @@ void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::st
             }
         }
     }
+
+    return;
 }
 
 std::string extractExtension(std::string path) {
@@ -53,6 +55,7 @@ void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::strin
     };
 
     roms.push_back(rom);
+    return;
 }
 
 void writeRomConfigToFile(std::vector<Rom>& roms, std::string path) {
@@ -67,6 +70,9 @@ void writeRomConfigToFile(std::vector<Rom>& roms, std::string path) {
     file << emit.c_str();
 
     file.close();
+    Logger::log(fmt::format("Index result written to: {}", path), logSeverity::INFO);
+
+    return;
 }
 
 std::vector<Emu> loadEmusFromConfig(std::string fileName) {
@@ -116,15 +122,16 @@ std::vector<Rom> loadRomsFromConfig(std::string fileName) {
     return roms;
 }
 
+//TODO: Recursive indexing
 std::vector<Rom> index(std::vector<Emu>& emus, std::string dir) {
     std::vector<Rom> roms{};
 
     writeDirToRomConfig(emus, roms, expandTilde(dir));
 
     #ifdef RELEASE
-    writeRomConfigToFile(roms, "~/.config/romManager/roms.yaml");
+        writeRomConfigToFile(roms, DEFAULT_CONFIG_ROMS_YAML);
     #elif defined(DEBUG)
-    writeRomConfigToFile(roms, "../config/test.yaml");
+        writeRomConfigToFile(roms, "../config/test.yaml");
     #endif
 
     return roms;

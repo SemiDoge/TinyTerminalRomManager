@@ -3,6 +3,7 @@
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options);
 void printVersion();
 
+//TODO: Set up testing
 //TODO: Search/Filtering option
 //TODO: Save file management? After above stuff is finished
 //TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
@@ -14,8 +15,8 @@ int main(int argc, char** argv) {
     auto optRes = setUpWorkflow(argc, argv, options);
 
     #ifdef RELEASE
-    std::string romsPath = expandTilde("~/.config/romManager/roms.yaml");
-    std::string emuPath =  expandTilde("~/.config/romManager/emus.yaml");
+    std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
+    std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
     #elif defined(DEBUG)
     std::string romsPath = "../config/test.yaml";
     std::string emuPath = "../config/emus.yaml";
@@ -80,8 +81,8 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
     if (result.count("index")) {
         std::vector<Emu> emus{};
         #ifdef RELEASE
-            std::string romsPath = expandTilde("~/.config/romManager/roms.yaml");
-            std::string emuPath =  expandTilde("~/.config/romManager/emus.yaml");
+            std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
+            std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
         #elif defined(DEBUG)
             std::string romsPath = "../config/test.yaml";
             std::string emuPath = "../config/emus.yaml";
