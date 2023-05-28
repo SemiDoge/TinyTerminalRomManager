@@ -8,6 +8,7 @@ Menu::Menu(int height, int width, int start_row, int start_col,
     this->start_row = start_row;
     this->start_col = start_col;
     this->scroll_offset = 0;
+    this->current_option = 0;
     this->menu_items = items;
     this->emus = emus;
     this->bRunning = true;
@@ -34,31 +35,31 @@ void Menu::OnExecute() {
         ch = getch();
         switch (ch) {
             case KEY_UP:
-                ScrollUp(UP_ARROW_STEP);
+                MoveUp(UP_ARROW_STEP);
                 break;
             case KEY_DOWN:
-                ScrollDown(DOWN_ARROW_STEP);
+                MoveDown(DOWN_ARROW_STEP);
                 break;
             case KEY_COMBO_CTRL_U:
-                ScrollUp(CTRL_U_STEP);
+                MoveUp(CTRL_U_STEP);
                 break;
             case KEY_COMBO_CTRL_D:
-                ScrollDown(CTRL_D_STEP);
+                MoveDown(CTRL_D_STEP);
                 break;
             case KEY_MOUSE:
                 if (getmouse(&mEvent) == OK) {
                     if (mEvent.bstate & BUTTON4_PRESSED) {
-                        ScrollUp(UP_ARROW_STEP);
+                        MoveUp(UP_ARROW_STEP);
                         break;
                     } else if (mEvent.bstate & BUTTON5_PRESSED) {
-                        ScrollDown(DOWN_ARROW_STEP);
+                        MoveDown(DOWN_ARROW_STEP);
                         break;
                     }
                 }
                 break;
             case '\n':
-                emu = chooseEmu(emus, menu_items[scroll_offset].emulator);
-                startEmulator(emu, menu_items[scroll_offset]);
+                emu = chooseEmu(emus, menu_items[current_option].emulator);
+                startEmulator(emu, menu_items[current_option]);
                 bRunning = false;
                 break;
             case '/':
@@ -79,14 +80,15 @@ void Menu::OnCleanup() {
 
 void Menu::OnRender() {
     wclear(stdscr);
-    int maxyLines = getmaxy(stdscr);
-    mvprintw(0, 0, "ROMS: %ld  SEL: %d", menu_items.size(), scroll_offset);
+    int maxyLines = getmaxy(stdscr) - NUM_NON_ENTRY_LINES;
+    mvprintw(0, 0, "ROMS: %ld SEL: %d(%d) MENU_HEIGHT: %d MAXYLINES: %d", menu_items.size(), current_option, scroll_offset, menu_height, maxyLines);
     for (int i = 0; i < menu_height; i++) {
         int index = i + scroll_offset;
-        if (index  == scroll_offset) {
+        if (index  == current_option) {
             attron(A_REVERSE);
         }
 
+        //simplify this, check line 85
         if (index < std::min((int) menu_items.size(), maxyLines+scroll_offset)) {
             int lastSlash = menu_items[index].emulator.find_last_of("/\\");
             std::string emuString = menu_items[index].emulator.substr(lastSlash + 1, menu_items[index].emulator.size());
@@ -96,7 +98,7 @@ void Menu::OnRender() {
                     emuString
                     
             ).c_str();
-            mvwprintw(stdscr, i + 1, 0, "%s", romString.c_str());
+            mvwprintw(stdscr, i + NUM_NON_ENTRY_LINES, 0, "%s", romString.c_str());
         } else {
             wrefresh(stdscr);
             attroff(A_REVERSE);
@@ -108,19 +110,35 @@ void Menu::OnRender() {
     }
 }
 
-void Menu::ScrollUp(int step) {
-    if (scroll_offset - step < 0) {
+void Menu::MoveUp(int step) {
+    if (current_option - step < 0) {
+        current_option = 0;
         scroll_offset = 0;
         return;
-    } else {
-        scroll_offset -= step;
+    }
+
+    if(current_option - step >= 0) {
+        if(scroll_offset > 0 && (current_option - step) - scroll_offset <= 0) {
+            scroll_offset -= step;
+        }
+        current_option -= step;
     }
 }
 
-void Menu::ScrollDown(int step) {
-    if (scroll_offset + step > (int) menu_items.size() - 2) {
-        scroll_offset = (int) menu_items.size() - 1;
+void Menu::MoveDown(int step) {
+    int maxyLines = getmaxy(stdscr) - NUM_NON_ENTRY_LINES;
+    int menuItemSize = (int) menu_items.size();
+
+    if(current_option + step >= menuItemSize) {
+        current_option = menuItemSize - 1;
+        scroll_offset = std::max(0, current_option - (maxyLines - 1));
+        return;
+    }
+    
+    if (current_option + step < (maxyLines) + scroll_offset && current_option + step < menuItemSize) {
+        current_option += step;
     } else {
         scroll_offset += step;
-    }
+        current_option += step;
+    } 
 }

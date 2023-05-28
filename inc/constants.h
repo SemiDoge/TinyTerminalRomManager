@@ -13,8 +13,8 @@
 #define DOWN_ARROW_STEP     1
 
 constexpr float __VER__MAJOR__ = 0;
-constexpr float __VER__MINOR__ = 2;
-constexpr float __VER__PATCH__ = 2;
+constexpr float __VER__MINOR__ = 3;
+constexpr float __VER__PATCH__ = 0;
 
 const std::string DEFAULT_CONFIG_ROMS_YAML = expandTilde("~/.config/romManager/roms.yaml");
 const std::string DEFAULT_CONFIG_EMUS_YAML = expandTilde("~/.config/romManager/emus.yaml");

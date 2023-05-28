@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <ncurses.h>
+#include <algorithm>
 #include <fmt/format.h>
 
 #include "../inc/main.h"
@@ -18,13 +19,14 @@ private:
     int start_row;
     int start_col;
     int scroll_offset;
+    int current_option;
     std::vector<Rom> menu_items;
     std::vector<Emu> emus;
     bool bRunning;
 
     void OnRender();
-    void ScrollUp(int step);
-    void ScrollDown(int step);
+    void MoveUp(int step);
+    void MoveDown(int step);
 
 public:
     Menu(int height, int width, int start_row, int start_col, const std::vector<Rom>& items, const std::vector<Emu>& emus);
