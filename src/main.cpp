@@ -3,8 +3,9 @@
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options);
 void printVersion();
 
+
+//TODO: Move to spdlog
 //TODO: Set up testing
-//TODO: Search/Filtering option
 //TODO: Save file management? After above stuff is finished
 //TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
 int main(int argc, char** argv) {
@@ -29,7 +30,6 @@ int main(int argc, char** argv) {
 
     std::vector<Rom> roms{};
     std::vector<Emu> emus{};
-
 
     try {
         emus = loadEmusFromConfig(emuPath);

@@ -18,4 +18,4 @@ void printRoms(std::vector<Rom>& roms);
 void startEmulator(Emu emu, Rom rom);
 std::string expandTilde(const std::string& path);
 
-#endif
+#endif // !MAIN_H

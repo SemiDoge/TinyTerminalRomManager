@@ -32,6 +32,7 @@ set (SOURCES
     ../src/logging.cpp
     ../src/config.cpp
     ../src/window.cpp
+    ../src/search.cpp
 )
 
 set (DEPS 

@@ -8,9 +8,15 @@ Menu::Menu(int height, int width, int start_row, int start_col,
     this->start_col = start_col;
     this->scroll_offset = 0;
     this->current_option = 0;
-    this->menu_items = items;
+    this->roms = items;
     this->emus = emus;
     this->bRunning = true;
+
+    this->searchModeType = false;
+    this->searchModeView = false;
+    this->searchString = "";
+
+    ResetMenu();
 }
 
 void Menu::OnInit() {
@@ -27,8 +33,10 @@ void Menu::OnInit() {
 
 void Menu::OnExecute() {
     int ch;
+    int sch = '\0';
     Emu emu;
     MEVENT mEvent;
+
     while (bRunning) {
         OnRender();
         ch = getch();
@@ -61,14 +69,60 @@ void Menu::OnExecute() {
                 break;
             case KEY_COMBO_CTRL_F:
             case '/':
-                //Search goes here
+                searchModeType = true;
+                scroll_offset  = 0;
+                current_option = 0;
+                searchString = "";
+                sch = '\0';
+
+                while((sch = getch()) != '\n' && searchString.size() < MAX_SEACH_STRING_LEN) {
+                    if(sch == KEY_ESCAPE) {
+                        searchModeType = false;
+                        searchString = "";
+                        ResetMenu();
+                        OnRender();
+                        break;
+                    }
+
+                    if(std::isalnum(sch) || std::ispunct(sch) || sch == KEY_BACKSPACE || sch == KEY_SPACE) {
+                        sch = tolower(sch);
+                        if (sch == KEY_BACKSPACE) {
+                            if (searchString.size() > 0 ) {
+                                searchString.pop_back();
+                            }
+                        } else {
+                            searchString.push_back(sch);
+                        }
+                    } else {
+                        continue;
+                    }
+
+                    if(searchString.size() > 0) {
+                        romSearch(roms, menu_items, searchString);
+                    } else {
+                        ResetMenu();
+                    }
+
+                    OnRender();
+                }
+
+                OnRender();
+                
+
+                break;
+            case KEY_ESCAPE:
+                if(searchModeType) {
+                    searchModeType = false;
+                    ResetMenu();
+                }
+
                 break;
             case 'Q':
-            case 'q':
+            case 'q': 
                 bRunning = false;
                 break;
-        }
 
+        }
     }
 }
 
@@ -79,7 +133,17 @@ void Menu::OnCleanup() {
 void Menu::OnRender() {
     wclear(stdscr);
     int maxyLines = getmaxy(stdscr) - NUM_NON_ENTRY_LINES;
-    mvprintw(0, 0, "ROMS: %ld SEL: %d(%d) MENU_HEIGHT: %d MAXYLINES: %d", menu_items.size(), current_option, scroll_offset, menu_height, maxyLines);
+
+    if(searchModeType) {
+        mvprintw(0, 0, "Search: %s (%ld results)\tPress ENTER to enter select mode. Press ESC to return to full listing.", searchString.c_str(), menu_items.size());
+    } else {
+        #ifdef RELEASE
+        mvprintw(0, 0, "ROMs: %ld\tSelected: %s", menu_items.size(), menu_items[current_option].name.c_str());
+        #elif defined(DEBUG)
+        mvprintw(0, 0, "ROMS: %ld SEL: %d(%d) MENU_HEIGHT: %d MAXYLINES: %d", menu_items.size(), current_option, scroll_offset, menu_height, maxyLines);
+        #endif
+    }
+
     for (int i = 0; i < menu_height; i++) {
         int index = i + scroll_offset;
         if (index  == current_option) {
@@ -141,6 +205,13 @@ void Menu::MoveDown(int step) {
     } 
 }
 
+
+void Menu::ResetMenu() {
+    this->menu_items.clear();
+    this->menu_items.reserve(roms.size());
+    std::copy(roms.begin(), roms.end(), std::back_inserter(this->menu_items));
+}
+
 // I hate this function, design forced it
 Emu chooseEmu(std::vector<Emu> emus, std::string path) {
     for(const auto& emu: emus) {
@@ -151,3 +222,4 @@ Emu chooseEmu(std::vector<Emu> emus, std::string path) {
 
     return emus[0];
 }
+

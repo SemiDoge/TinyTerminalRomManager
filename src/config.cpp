@@ -43,6 +43,11 @@ std::string toUpper(std::string str) {
     return str;
 }
 
+std::string toLower(std::string str) {
+    for (auto & c: str) c = (unsigned char) tolower(c);
+    return str;
+}
+
 void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
     size_t lastSlash = path.find_last_of("/\\");
     size_t lastDot = path.find_last_of(".");
