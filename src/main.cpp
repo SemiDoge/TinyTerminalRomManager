@@ -10,7 +10,7 @@ void printVersion();
 int main(int argc, char** argv) {
     Logger::setAllowedToPrint(true);
     cxxopts::Options options("romManager", 
-        "A simple ncurses driven ROM manager, for all your emulation needs!\nPlease use this tool with only legally obtained ROMS."
+        "A simple ncurses driven ROM manager, for all your emulation management needs!\nPlease use this tool with only legally obtained ROMS."
     );
     try {
         auto optRes = setUpWorkflow(argc, argv, options);
@@ -149,7 +149,7 @@ void startEmulator(Emu emu, Rom rom) {
                 if (emuArgs == "${FILENAME}") {
                     args.push_back(const_cast<char*>(rom.filename.c_str()));
                     continue;
-                }
+                } 
 
                 args.push_back(const_cast<char*>(emuArgs.c_str()));
             } 

@@ -2,19 +2,29 @@
 #include "../inc/logging.h"
 #include "../inc/constants.h"
 
-//TODO: This will index non ROMs, use the typeAssoc data member in Emu to filter out irrelevant files, see line 15
-void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
 
+//TODO: FIX: Giving this function a dir without the /, aka ~/RomManager, will mess up indexing
+void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
     fs::path dirPath = path;
+    std::unordered_set<std::string> validExtensions{};
+
+    for(const auto& emu : emus) {
+        for(const auto& ext: emu.typeAssoc) {
+            validExtensions.insert(toUpper(ext));
+        }
+    }
 
     if (fs::exists(dirPath) && fs::is_directory(dirPath)) {
         for (const auto & file : fs::directory_iterator(dirPath)) {
             const fs::path filePath = file.path();
             const std::string extension = toUpper(extractExtension(filePath));
 
-            if(extension != "SAV") {
-                std::string fullPath = fmt::format("{}{}", path, filePath.filename().c_str());
-                writeRomToConfig(emus, roms, fullPath);
+            for(const auto& ext : validExtensions) {
+                if(ext == extension) {
+                    std::string fullPath = fmt::format("{}{}", path, filePath.filename().c_str());
+                    writeRomToConfig(emus, roms, fullPath);
+                    break;
+                }
             }
         }
     }

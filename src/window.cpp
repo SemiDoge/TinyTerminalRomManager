@@ -118,7 +118,7 @@ void Menu::MoveUp(int step) {
     }
 
     if(current_option - step >= 0) {
-        if(scroll_offset > 0 && (current_option - step) - scroll_offset <= 0) {
+        if(scroll_offset > 0 && (current_option - step) - scroll_offset < 0) {
             scroll_offset -= step;
         }
         current_option -= step;

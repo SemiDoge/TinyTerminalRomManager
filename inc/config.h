@@ -1,11 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <assert.h>
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <unordered_set>
 
 #include "structs.h"
 
