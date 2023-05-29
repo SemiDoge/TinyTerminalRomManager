@@ -36,4 +36,6 @@ public:
     void OnCleanup();
 };
 
+Emu chooseEmu(std::vector<Emu> emus, std::string path);
+
 #endif

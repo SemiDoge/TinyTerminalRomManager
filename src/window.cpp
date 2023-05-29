@@ -22,7 +22,7 @@ void Menu::OnInit() {
     curs_set(0);
 
     // init mouse scroll wheels
-    mmask_t mask = BUTTON4_PRESSED | BUTTON5_PRESSED;
+    const mmask_t mask = BUTTON4_PRESSED | BUTTON5_PRESSED;
     mousemask(mask, NULL);
 }
 
@@ -141,4 +141,15 @@ void Menu::MoveDown(int step) {
         scroll_offset += step;
         current_option += step;
     } 
+}
+
+// I hate this function, design forced it
+Emu chooseEmu(std::vector<Emu> emus, std::string path) {
+    for(const auto& emu: emus) {
+        if(emu.filename == path) {
+            return emu;
+        }
+    }
+
+    return emus[0];
 }

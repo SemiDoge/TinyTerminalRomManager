@@ -13,18 +13,18 @@ int main(int argc, char** argv) {
         "A simple ncurses driven ROM manager, for all your emulation management needs!\nPlease use this tool with only legally obtained ROMS."
     );
     try {
-        auto optRes = setUpWorkflow(argc, argv, options);
+        const auto optRes = setUpWorkflow(argc, argv, options);
     } catch (cxxopts::exceptions::missing_argument error) {
         Logger::log(fmt::format("{}", error.what()), logSeverity::ERROR);
         return -1;
     }
 
     #ifdef RELEASE
-        std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
-        std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
+        const std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
+        const std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
     #elif defined(DEBUG)
-        std::string romsPath = "../config/test.yaml";
-        std::string emuPath = "../config/emus.yaml";
+        const std::string romsPath = "../config/test.yaml";
+        const std::string emuPath = "../config/emus.yaml";
     #endif
 
     std::vector<Rom> roms{};
@@ -68,7 +68,7 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
         ("h,help", "PRINT help text")
     ; 
 
-    auto result = options.parse(argc, argv);
+    const auto result = options.parse(argc, argv);
 
     if (result.count("help")) {
         fmt::print("{}", options.help());
@@ -83,11 +83,11 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
     if (result.count("index")) {
         std::vector<Emu> emus{};
         #ifdef RELEASE
-            std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
-            std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
+            const std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
+            const std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
         #elif defined(DEBUG)
-            std::string romsPath = "../config/test.yaml";
-            std::string emuPath = "../config/emus.yaml";
+            const std::string romsPath = "../config/test.yaml";
+            const std::string emuPath = "../config/emus.yaml";
         #endif
 
         try {
@@ -136,8 +136,8 @@ void startEmulator(Emu emu, Rom rom) {
         fmt::print("Fork failed!\n");
         return;
     } else if (pid == 0) {
-        std::string command = rom.emulator;
-        std::string arg = rom.filename;
+        const std::string command = rom.emulator;
+        const std::string arg = rom.filename;
 
         std::vector<char*> args;
         args.push_back(const_cast<char*>(command.c_str()));
@@ -158,7 +158,7 @@ void startEmulator(Emu emu, Rom rom) {
             execvp(args[0], args.data());
 
         } else {
-            std::string fileArg = expandTilde(arg);
+            const std::string fileArg = expandTilde(arg);
             args.push_back(const_cast<char*>(fileArg.c_str()));
             args.push_back(nullptr);
             execvp(args[0], args.data());
@@ -167,15 +167,4 @@ void startEmulator(Emu emu, Rom rom) {
         fmt::print("Error executing command!\n");
         return;
     }
-}
-
-// I hate this function, design forced it
-Emu chooseEmu(std::vector<Emu> emus, std::string path) {
-    for(const auto& emu: emus) {
-        if(emu.filename == path) {
-            return emu;
-        }
-    }
-
-    return emus[0];
 }

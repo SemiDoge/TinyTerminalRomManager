@@ -175,5 +175,5 @@ std::string autoDetectEmu(std::vector<Emu>& emus, std::string ext) {
         }
     }
 
-    return "mgba-qt";
+    return "";
 }
