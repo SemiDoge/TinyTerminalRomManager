@@ -1,8 +1,7 @@
 #include "../inc/window.h"
 
 Menu::Menu(int height, int width, int start_row, int start_col,
-    const std::vector<Rom>& items, const std::vector<Emu>& emus) 
-{
+    const std::vector<Rom>& items, const std::vector<Emu>& emus) {
     this->menu_height = height;
     this->menu_width = width;
     this->start_row = start_row;
@@ -50,10 +49,8 @@ void Menu::OnExecute() {
                 if (getmouse(&mEvent) == OK) {
                     if (mEvent.bstate & BUTTON4_PRESSED) {
                         MoveUp(UP_ARROW_STEP);
-                        break;
                     } else if (mEvent.bstate & BUTTON5_PRESSED) {
                         MoveDown(DOWN_ARROW_STEP);
-                        break;
                     }
                 }
                 break;
@@ -62,6 +59,7 @@ void Menu::OnExecute() {
                 startEmulator(emu, menu_items[current_option]);
                 bRunning = false;
                 break;
+            case KEY_COMBO_CTRL_F:
             case '/':
                 //Search goes here
                 break;
