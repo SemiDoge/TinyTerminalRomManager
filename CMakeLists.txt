@@ -21,15 +21,15 @@ endif()
 #add deps
 include(cmake/CPM.cmake)
 
-CPMAddPackage("gh:fmtlib/fmt#10.0.0")
+CPMAddPackage("gh:fmtlib/fmt#9.1.0")
 CPMAddPackage("gh:jbeder/yaml-cpp#yaml-cpp-0.7.0")
 CPMAddPackage("gh:jarro2783/cxxopts@3.1.1")
+CPMAddPackage("gh:gabime/spdlog@1.11.0")
 # also requires ncurses 
 
 #variables
 set (SOURCES 
     ../src/main.cpp
-    ../src/logging.cpp
     ../src/config.cpp
     ../src/window.cpp
     ../src/search.cpp
@@ -39,6 +39,7 @@ set (DEPS
     fmt::fmt
     yaml-cpp::yaml-cpp
     cxxopts::cxxopts
+    spdlog::spdlog
 )
 
 set (LINKER_FLAGS

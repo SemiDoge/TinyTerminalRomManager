@@ -7,8 +7,8 @@
 #include <iostream>
 #include <cxxopts.hpp>
 #include <ncurses.h>
+#include <spdlog/spdlog.h>
 
-#include "../inc/logging.h"
 #include "../inc/config.h"
 #include "../inc/window.h"
 #include "../inc/structs.h"

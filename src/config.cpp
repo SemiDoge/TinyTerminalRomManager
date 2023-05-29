@@ -1,12 +1,14 @@
 #include "../inc/config.h"
-#include "../inc/logging.h"
 #include "../inc/constants.h"
 
 
-//TODO: FIX: Giving this function a dir without the /, aka ~/RomManager, will mess up indexing
 void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
     fs::path dirPath = path;
     std::unordered_set<std::string> validExtensions{};
+
+    if(fs::is_directory(dirPath) && path[path.size()-1] != '/') {
+        path.push_back('/');
+    }
 
     for(const auto& emu : emus) {
         for(const auto& ext: emu.typeAssoc) {
@@ -86,7 +88,7 @@ void writeRomConfigToFile(std::vector<Rom>& roms, std::string path) {
     file << emit.c_str();
 
     file.close();
-    Logger::log(fmt::format("Index result written to: {}", path), logSeverity::INFO);
+    spdlog::info("Index result written to: {}", path);
 
     return;
 }

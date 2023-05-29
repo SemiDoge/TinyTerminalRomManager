@@ -4,19 +4,19 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 void printVersion();
 
 
-//TODO: Move to spdlog
 //TODO: Set up testing
 //TODO: Save file management? After above stuff is finished
 //TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
 int main(int argc, char** argv) {
-    Logger::setAllowedToPrint(true);
+    spdlog::set_pattern("%^%l%$: %v");
     cxxopts::Options options("romManager", 
         "A simple ncurses driven ROM manager, for all your emulation management needs!\nPlease use this tool with only legally obtained ROMS."
     );
+
     try {
         const auto optRes = setUpWorkflow(argc, argv, options);
     } catch (cxxopts::exceptions::missing_argument error) {
-        Logger::log(fmt::format("{}", error.what()), logSeverity::ERROR);
+        spdlog::error("{}", error.what());
         return -1;
     }
 
@@ -34,22 +34,22 @@ int main(int argc, char** argv) {
     try {
         emus = loadEmusFromConfig(emuPath);
     } catch(YAML::InvalidNode& error) {
-        Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+        spdlog::error("Could not parse the emulator config file, reason: {}", error.msg);
         return -1;
     } catch(YAML::BadFile& error) {
-        Logger::log(fmt::format("Could not load emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+        spdlog::error("Could not load emulator config file, reason: {}", error.msg);
         return -1;
     }
 
     try {
         roms = loadRomsFromConfig(romsPath);
     } catch(YAML::BadFile& error) {
-        Logger::log(fmt::format("Could not load rom config file, reason: {}", error.msg), logSeverity::ERROR);
+        spdlog::error("Could not load rom config file, reason: {}", error.msg);
         return -1;
     }
 
     if (roms.size() == 0) {
-        Logger::log("Config file empty!\n", logSeverity::ERROR);
+        spdlog::error("Config file empty!");
         return -1;
     }
 
@@ -93,20 +93,20 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
         try {
             emus = loadEmusFromConfig(emuPath);
         } catch(YAML::InvalidNode& error) {
-            Logger::log(fmt::format("Could not parse the emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+            spdlog::error("Could not parse the emulator config file, reason: {}", error.msg);
             exit(-1);
         } catch(YAML::BadFile& error) {
-            Logger::log(fmt::format("Could not load emulator config file, reason: {}", error.msg), logSeverity::ERROR);
+            spdlog::error("Could not load emulator config file, reason: {}", error.msg);
             exit(-1);
         }
 
         std::string dirToIndex = result["index"].as<std::string>();
 
-        Logger::log(fmt::format("Indexing: {}", dirToIndex), logSeverity::INFO);
+        spdlog::info("Indexing: {}", dirToIndex);
         auto ret = index(emus, dirToIndex);
 
-        Logger::log(fmt::format("Finished indexing {}", dirToIndex), logSeverity::INFO);
-        Logger::log(fmt::format("Roms found: {}", ret.size()), logSeverity::INFO);
+        spdlog::info("Finished indexing {}", dirToIndex);
+        spdlog::info("Roms found: {}", ret.size());
         exit(EXIT_SUCCESS);
     }
 
