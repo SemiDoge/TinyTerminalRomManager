@@ -1,6 +1,6 @@
 #include "../inc/search.h"
 
-// Function to calculate the Levenshtein distance between two strings
+// Function to calculate the Levenshtein Distance between two strings
 // https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm
 int levenshteinDistance(const std::string& str1, const std::string& str2) {
     const int m = str1.length();
@@ -30,7 +30,7 @@ int levenshteinDistance(const std::string& str1, const std::string& str2) {
 std::vector<Rom> fuzzySearch(const std::vector<Rom>& roms, const std::string& searchString, int maxDistance) {
     std::map<int, Rom> subResults;
     std::vector<Rom> results;
-    const int subStringBias = 30;
+    const int subStringBias = 30; //Biases the results if searchString is a substring of the ROM name
     maxDistance = (searchString.length() == 0) ? maxDistance / 1 : maxDistance / searchString.length();
     // fmt::print("mD: {}\n", maxDistance);
     

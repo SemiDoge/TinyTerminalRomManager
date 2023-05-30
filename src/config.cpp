@@ -8,6 +8,7 @@ void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::st
 
     if(fs::is_directory(dirPath) && path[path.size()-1] != '/') {
         path.push_back('/');
+        dirPath = path;
     }
 
     for(const auto& emu : emus) {

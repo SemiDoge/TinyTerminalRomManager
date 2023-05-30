@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
         const auto optRes = setUpWorkflow(argc, argv, options);
     } catch (cxxopts::exceptions::missing_argument error) {
         spdlog::error("{}", error.what());
-        return -1;
+        return EXIT_FAILURE;
     }
 
     #ifdef RELEASE
@@ -35,22 +35,23 @@ int main(int argc, char** argv) {
         emus = loadEmusFromConfig(emuPath);
     } catch(YAML::InvalidNode& error) {
         spdlog::error("Could not parse the emulator config file, reason: {}", error.msg);
-        return -1;
+        return EXIT_FAILURE;
+        
     } catch(YAML::BadFile& error) {
         spdlog::error("Could not load emulator config file, reason: {}", error.msg);
-        return -1;
+        return EXIT_FAILURE;
     }
 
     try {
         roms = loadRomsFromConfig(romsPath);
     } catch(YAML::BadFile& error) {
         spdlog::error("Could not load rom config file, reason: {}", error.msg);
-        return -1;
+        return EXIT_FAILURE;
     }
 
     if (roms.size() == 0) {
         spdlog::error("Config file empty!");
-        return -1;
+        return EXIT_FAILURE;
     }
 
     Menu menu(roms.size(), 90, 0, 0, roms, emus);
@@ -94,10 +95,10 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
             emus = loadEmusFromConfig(emuPath);
         } catch(YAML::InvalidNode& error) {
             spdlog::error("Could not parse the emulator config file, reason: {}", error.msg);
-            exit(-1);
+            exit(EXIT_FAILURE);
         } catch(YAML::BadFile& error) {
             spdlog::error("Could not load emulator config file, reason: {}", error.msg);
-            exit(-1);
+            exit(EXIT_FAILURE);
         }
 
         std::string dirToIndex = result["index"].as<std::string>();
@@ -115,9 +116,9 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 
 void printVersion() {
     fmt::print("romManager VERSION {}.{}.{}\n", 
-        fmt::styled(__VER__MAJOR__, fmt::fg(fmt::color::orange)),
-        fmt::styled(__VER__MINOR__, fmt::fg(fmt::color::orange)),
-        fmt::styled(__VER__PATCH__, fmt::fg(fmt::color::orange))
+        fmt::styled(__VER__MAJOR__, fmt::fg(fmt::color::yellow)),
+        fmt::styled(__VER__MINOR__, fmt::fg(fmt::color::yellow)),
+        fmt::styled(__VER__PATCH__, fmt::fg(fmt::color::yellow))
     );
 }
 

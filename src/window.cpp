@@ -75,7 +75,9 @@ void Menu::OnExecute() {
                 searchString = "";
                 sch = '\0';
 
-                while((sch = getch()) != '\n' && searchString.size() < MAX_SEACH_STRING_LEN) {
+                while((sch = getch()) != '\n') {
+                    
+
                     if(sch == KEY_ESCAPE) {
                         searchModeType = false;
                         searchString = "";
@@ -91,6 +93,10 @@ void Menu::OnExecute() {
                                 searchString.pop_back();
                             }
                         } else {
+                            if(searchString.size() >= MAX_SEACH_STRING_LEN) {
+                                continue;
+                            }
+
                             searchString.push_back(sch);
                         }
                     } else {
@@ -155,7 +161,7 @@ void Menu::OnRender() {
             int lastSlash = menu_items[index].emulator.find_last_of("/\\");
             std::string emuString = menu_items[index].emulator.substr(lastSlash + 1, menu_items[index].emulator.size());
 
-            std::string romString = fmt::format("[{}] {} via {}", 
+            std::string romString = fmt::format("[{:^5}] {} via {}", 
                     menu_items[index].type, menu_items[index].name, 
                     emuString
                     
