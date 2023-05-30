@@ -103,11 +103,14 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 
         std::string dirToIndex = result["index"].as<std::string>();
 
-        spdlog::info("Indexing: {}", dirToIndex);
-        auto ret = index(emus, dirToIndex);
+        std::vector<Rom> roms{};
+        fs::path dirPath = expandTilde(dirToIndex);
+        index(emus, roms, dirPath);
+
+        commitToFile(roms);
 
         spdlog::info("Finished indexing {}", dirToIndex);
-        spdlog::info("Roms found: {}", ret.size());
+        spdlog::info("Roms found: {}", roms.size());
         exit(EXIT_SUCCESS);
     }
 

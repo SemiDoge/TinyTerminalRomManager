@@ -39,7 +39,7 @@ set (DEPS
     fmt::fmt
     yaml-cpp::yaml-cpp
     cxxopts::cxxopts
-    spdlog::spdlog
+    # spdlog::spdlog
 )
 
 set (LINKER_FLAGS

@@ -142,18 +142,29 @@ std::vector<Rom> loadRomsFromConfig(std::string fileName) {
 }
 
 //TODO: Recursive indexing
-std::vector<Rom> index(std::vector<Emu>& emus, std::string dir) {
-    std::vector<Rom> roms{};
+void index(std::vector<Emu>& emus, std::vector<Rom>& roms, fs::path dir, int depth) {
+    if(depth > 3) {
+        return;
+    }
 
-    writeDirToRomConfig(emus, roms, expandTilde(dir));
+    writeDirToRomConfig(emus, roms, dir);
 
+    for (const auto& entry : fs::directory_iterator(dir)) {
+        if (fs::is_directory(entry)) {
+            spdlog::info("Indexing: {}", entry.path().c_str());
+            index(emus, roms, entry, depth + 1);
+        } else if (fs::is_regular_file(entry)) {
+            continue;
+        }
+    }
+}
+
+void commitToFile(std::vector<Rom>& roms) {
     #ifdef RELEASE
         writeRomConfigToFile(roms, DEFAULT_CONFIG_ROMS_YAML);
     #elif defined(DEBUG)
         writeRomConfigToFile(roms, "../config/test.yaml");
     #endif
-
-    return roms;
 }
 
 std::string expandTilde(const std::string& path) {

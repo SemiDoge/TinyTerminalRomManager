@@ -21,7 +21,8 @@ void writeRomConfigToFile(std::vector<Rom>& roms, std::string path);
 void writeEmuConfigToFile(std::vector<Emu>& emus, std::string path);
 std::vector<Rom> loadRomsFromConfig(std::string fileName);
 std::vector<Emu> loadEmusFromConfig(std::string fileName);
-std::vector<Rom> index(std::vector<Emu>& emus, std::string dir);
+void index(std::vector<Emu>& emus, std::vector<Rom>& roms, fs::path dir, int depth = 0);
+void commitToFile(std::vector<Rom>& roms);
 std::string expandTilde(const std::string& path);
 std::string autoDetectEmu(std::vector<Emu>& emus, std::string ext);
 

@@ -8,6 +8,7 @@
 #include <cxxopts.hpp>
 #include <ncurses.h>
 #include <spdlog/spdlog.h>
+#include <filesystem>
 
 #include "../inc/config.h"
 #include "../inc/window.h"
