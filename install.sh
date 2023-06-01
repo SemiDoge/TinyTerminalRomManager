@@ -1,4 +1,5 @@
 #! /bin/bash
+# Installs on 
 
 set -xe
 sed -i 's/#define DEBUG/#define RELEASE/' inc/constants.h

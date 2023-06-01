@@ -141,7 +141,7 @@ std::vector<Rom> loadRomsFromConfig(std::string fileName) {
     return roms;
 }
 
-//TODO: Recursive indexing
+//TODO: Add a --depth switch to control the max depth of the recursion
 void index(std::vector<Emu>& emus, std::vector<Rom>& roms, fs::path dir, int depth) {
     if(depth > 3) {
         return;

@@ -30,24 +30,28 @@ int levenshteinDistance(const std::string& str1, const std::string& str2) {
 std::vector<Rom> fuzzySearch(const std::vector<Rom>& roms, const std::string& searchString, int maxDistance) {
     std::map<int, Rom> subResults;
     std::vector<Rom> results;
-    const int subStringBias = 30; //Biases the results if searchString is a substring of the ROM name
     maxDistance = (searchString.length() == 0) ? maxDistance / 1 : maxDistance / searchString.length();
-    // fmt::print("mD: {}\n", maxDistance);
     
 
     for (const auto& rom : roms) {
         std::string romName = toLower(rom.name);
-        int distance = levenshteinDistance(romName, searchString);
+        int distance = levenshteinDistance(romName, toLower(searchString));
 
         size_t found = romName.find(searchString);
         bool bSubstring = (found != std::string::npos);
 
+        //Biases the results if searchString is a substring of the ROM name
         if(bSubstring) {
-            distance -= subStringBias;
+            distance -= rom.name.size();
         }
 
         if (distance <= maxDistance) {
-            subResults.insert(std::make_pair(distance, rom));
+            auto insertionRes = subResults.insert(std::make_pair(distance, rom));
+            
+            //If it tried to insert into a preexisting key find next available key
+            while(!insertionRes.second) {
+                insertionRes = subResults.insert(std::make_pair(distance++, rom));
+            }
         }
     }
 
