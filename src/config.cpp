@@ -159,14 +159,6 @@ void index(std::vector<Emu>& emus, std::vector<Rom>& roms, fs::path dir, int dep
     }
 }
 
-void commitToFile(std::vector<Rom>& roms) {
-    #ifdef RELEASE
-        writeRomConfigToFile(roms, DEFAULT_CONFIG_ROMS_YAML);
-    #elif defined(DEBUG)
-        writeRomConfigToFile(roms, "../config/test.yaml");
-    #endif
-}
-
 std::string expandTilde(const std::string& path) {
     if (path.empty() || path[0] != '~') {
         return path;

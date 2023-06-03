@@ -105,9 +105,14 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 
         std::vector<Rom> roms{};
         fs::path dirPath = expandTilde(dirToIndex);
-        index(emus, roms, dirPath);
+        try {
+            index(emus, roms, dirPath);
+        } catch (fs::filesystem_error err) {
+            spdlog::error("Could not index directory '{}', reason: {}", dirPath.string(), err.what());
+            exit(EXIT_FAILURE);
+        }
 
-        commitToFile(roms);
+        writeRomConfigToFile(roms, romsPath);
 
         spdlog::info("Finished indexing {}", dirToIndex);
         spdlog::info("Roms found: {}", roms.size());
@@ -168,7 +173,7 @@ void startEmulator(Emu emu, Rom rom) {
             execvp(args[0], args.data());
         }
 
-        fmt::print("Error executing command!\n");
+        spdlog::error("Error executing command!");
         return;
     }
 }

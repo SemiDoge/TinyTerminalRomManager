@@ -73,7 +73,6 @@ void Menu::OnExecute() {
                 scroll_offset  = 0;
                 current_option = 0;
                 searchString = "";
-                sch = '\0';
 
                 while((sch = getch()) != '\n') {
                     
@@ -161,8 +160,8 @@ void Menu::OnRender() {
             //Weird rare bug occurred on the next line with a certain file, the Rom structure of this file was seemingly filled with 
             //uninitialized/garbage memory, seg faulted due to trying to access memory it shouldn't've.
             int lastSlash = menu_items[index].emulator.find_last_of("/\\");
-            std::string emuString = menu_items[index].emulator.substr(lastSlash + 1, menu_items[index].emulator.size());
 
+            std::string emuString = menu_items[index].emulator.substr(lastSlash + 1, menu_items[index].emulator.size());
             std::string romString = fmt::format("[{:^5}] {} via {}", 
                     menu_items[index].type, menu_items[index].name, 
                     emuString
