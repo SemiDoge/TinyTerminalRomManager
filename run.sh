@@ -2,9 +2,11 @@
 
 cd build
 
+exe="ttrm"
+
 if [ -z "$1" ]
 then
-    ./romManager
+    ./$exe
 else
-    ./romManager $1
+    ./$exe $1
 fi

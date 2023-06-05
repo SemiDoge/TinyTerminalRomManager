@@ -9,13 +9,16 @@ void printVersion();
 //TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
 int main(int argc, char** argv) {
     spdlog::set_pattern("%^%l%$: %v");
-    cxxopts::Options options("romManager", 
+    cxxopts::Options options("ttrm", 
         "A simple ncurses driven ROM manager, for all your emulation management needs!\nPlease use this tool with only legally obtained ROMS."
     );
 
     try {
         const auto optRes = setUpWorkflow(argc, argv, options);
     } catch (cxxopts::exceptions::missing_argument error) {
+        spdlog::error("{}", error.what());
+        return EXIT_FAILURE;
+    } catch (cxxopts::exceptions::invalid_option_syntax error) {
         spdlog::error("{}", error.what());
         return EXIT_FAILURE;
     }
@@ -49,12 +52,12 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (roms.size() == 0) {
+    if (roms.empty()) {
         spdlog::error("Config file empty!");
         return EXIT_FAILURE;
     }
 
-    Menu menu(roms.size(), 90, 0, 0, roms, emus);
+    Menu menu(static_cast<int>(roms.size()), 90, 0, 0, roms, emus);
     menu.OnInit();
     menu.OnExecute();
     menu.OnCleanup();
@@ -63,7 +66,8 @@ int main(int argc, char** argv) {
 }
 
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options) {
-   options.add_options()
+    //TODO: Investigate an exception being thrown with invoking ttrm with --index flag, instead of -i.
+    options.add_options()
         ("i,index", "INDEX Rom directory", cxxopts::value<std::string>())
         ("v,version", "PRINT program version")
         ("h,help", "PRINT help text")
@@ -71,17 +75,17 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 
     const auto result = options.parse(argc, argv);
 
-    if (result.count("help")) {
+    if (static_cast<bool>(result.count("help"))) {
         fmt::print("{}", options.help());
         exit(EXIT_SUCCESS);
     }
 
-    if (result.count("version")) {
+    if (static_cast<bool>(result.count("version"))) {
         printVersion();
         exit(EXIT_SUCCESS);
     }
 
-    if (result.count("index")) {
+    if (static_cast<bool>(result.count("index"))) {
         std::vector<Emu> emus{};
         #ifdef RELEASE
             const std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
@@ -123,7 +127,7 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
 }
 
 void printVersion() {
-    fmt::print("romManager VERSION {}.{}.{}\n", 
+    fmt::print("TinyTerminalRomManager VERSION {}.{}.{}\n", 
         fmt::styled(__VER__MAJOR__, fmt::fg(fmt::color::yellow)),
         fmt::styled(__VER__MINOR__, fmt::fg(fmt::color::yellow)),
         fmt::styled(__VER__PATCH__, fmt::fg(fmt::color::yellow))
@@ -132,28 +136,27 @@ void printVersion() {
 
 void printRoms(std::vector<Rom>& roms) {
     for (const auto& rom : roms) {
-        fmt::print("{:02X}: {} via {} ({})\n", rom.id, rom.name, rom.emulator, rom.type);
+        fmt::print("{} via {} ({})\n", rom.name, rom.emulator, rom.type);
     }
-
-    return;
 }
 
-void startEmulator(Emu emu, Rom rom) {
+void startEmulator(const Emu & emu, const Rom& rom) {
     pid_t pid = fork();
 
     if (pid == -1) {
         fmt::print("Fork failed!\n");
         return;
-    } else if (pid == 0) {
+    } 
+    
+    if (pid == 0) {
         const std::string command = rom.emulator;
         const std::string arg = rom.filename;
 
         std::vector<char*> args;
         args.push_back(const_cast<char*>(command.c_str()));
 
-
         // TODO: This should check that if emu.args.size() > 0, ${FILENAME} ought to be in the emu args array
-        if (emu.args.size() > 0) {
+        if (!emu.args.empty()) {
             for(const auto& emuArgs : emu.args) {
                 if (emuArgs == "${FILENAME}") {
                     args.push_back(const_cast<char*>(rom.filename.c_str()));

@@ -19,7 +19,7 @@ void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::st
 
     if (fs::exists(dirPath) && fs::is_directory(dirPath)) {
         for (const auto & file : fs::directory_iterator(dirPath)) {
-            const fs::path filePath = file.path();
+            const fs::path& filePath = file.path();
             const std::string extension = toUpper(extractExtension(filePath));
 
             for(const auto& ext : validExtensions) {
@@ -31,29 +31,27 @@ void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::st
             }
         }
     }
-
-    return;
 }
 
-std::string extractExtension(std::string path) {
-    size_t lastDot = path.find_last_of(".");
+std::string extractExtension(const std::string& path) {
+    size_t lastDot = path.find_last_of('.');
 
     return path.substr(lastDot + 1, path.length());
 }
 
 std::string toUpper(std::string str) {
-    for (auto & c: str) c = (unsigned char) toupper(c);
+    for (auto & chr: str) chr = static_cast<unsigned char>(toupper(chr));
     return str;
 }
 
 std::string toLower(std::string str) {
-    for (auto & c: str) c = (unsigned char) tolower(c);
+    for (auto & chr: str) chr =  static_cast<unsigned char>(tolower(chr));
     return str;
 }
 
-void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
+void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, const std::string& path) {
     size_t lastSlash = path.find_last_of("/\\");
-    size_t lastDot = path.find_last_of(".");
+    size_t lastDot = path.find_last_of('.');
 
     std::string romName{};
     std::string romExt{};
@@ -62,8 +60,8 @@ void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::strin
     romName = path.substr(lastSlash + 1, lastDot - (lastSlash + 1));
     romExt = extractExtension(path);
 
-    std::transform(romExt.begin(), romExt.end(), romExt.begin(), [](unsigned char c) {
-        return std::toupper(c);
+    std::transform(romExt.begin(), romExt.end(), romExt.begin(), [](unsigned char chr) {
+        return std::toupper(chr);
     });
     
     Rom rom = {
@@ -74,7 +72,6 @@ void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::strin
     };
 
     roms.push_back(rom);
-    return;
 }
 
 void writeRomConfigToFile(std::vector<Rom>& roms, std::string path) {
@@ -90,20 +87,18 @@ void writeRomConfigToFile(std::vector<Rom>& roms, std::string path) {
 
     file.close();
     spdlog::info("Index result written to: {}", path);
-
-    return;
 }
 
-std::vector<Emu> loadEmusFromConfig(std::string fileName) {
+std::vector<Emu> loadEmusFromConfig(const std::string& fileName) {
     YAML::Node configFile = YAML::LoadFile(fileName);
     std::vector<Emu> emu{};
 
     for (const auto& entry : configFile) {
         Emu newEmu{};
-        newEmu.id = emu.size();
         newEmu.name = entry["name"].as<std::string>();
         newEmu.type = entry["type"].as<std::string>();
         newEmu.filename = entry["path"].as<std::string>();
+        // Need a way of creating an error if filename doesn't exist in emu config file.
 
         const YAML::Node& extensionNode = entry["extension"];
         for (const YAML::Node& node : extensionNode) {
@@ -121,28 +116,25 @@ std::vector<Emu> loadEmusFromConfig(std::string fileName) {
     return emu;
 }
 
-std::vector<Rom> loadRomsFromConfig(std::string fileName) {
+std::vector<Rom> loadRomsFromConfig(const std::string& fileName) {
     YAML::Node configFile = YAML::LoadFile(fileName);
     std::vector<Rom> roms{};
 
-    short i = 0;
     for (const auto& entry : configFile) {
         Rom newRom{};
-        newRom.id = i;
         newRom.name = entry["name"].as<std::string>();
         newRom.filename = entry["filename"].as<std::string>();
         newRom.type = entry["type"].as<std::string>();
         newRom.emulator = entry["emulator"].as<std::string>();
 
         roms.push_back(newRom);
-        i++;
     }
 
     return roms;
 }
 
 //TODO: Add a --depth switch to control the max depth of the recursion
-void index(std::vector<Emu>& emus, std::vector<Rom>& roms, fs::path dir, int depth) {
+void index(std::vector<Emu>& emus, std::vector<Rom>& roms, const fs::path& dir, int depth) {
     if(depth > 3) {
         return;
     }
@@ -167,7 +159,7 @@ std::string expandTilde(const std::string& path) {
     std::string expandedPath;
     const char* homeDir = std::getenv("HOME");
 
-    if (homeDir) {
+    if (homeDir != nullptr) {
         expandedPath = fmt::format("{}{}", homeDir, path.substr(1));
     } else {
         expandedPath = fmt::format("/home/username{}", homeDir, path.substr(1));
@@ -176,11 +168,11 @@ std::string expandTilde(const std::string& path) {
     return expandedPath;
 }
 
-std::string autoDetectEmu(std::vector<Emu>& emus, std::string ext) {
+std::string autoDetectEmu(std::vector<Emu>& emus, const std::string& ext) {
 
     for(const auto& emu : emus) {
-        for(const auto& ft : emu.typeAssoc) {
-            if (toUpper(ft) == ext) {
+        for(const auto& filetype : emu.typeAssoc) {
+            if (toUpper(filetype) == ext) {
                 return emu.filename;
             }
         }

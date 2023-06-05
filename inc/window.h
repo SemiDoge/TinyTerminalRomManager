@@ -26,13 +26,13 @@ private:
     std::vector<Emu> emus;
     bool bRunning;
 
-    bool searchModeType;
-    bool searchModeView;
+    bool searchMode;
     std::string searchString;
 
     void OnRender();
     void MoveUp(int step);
     void MoveDown(int step);
+    void Search();
     void ResetMenu();
 
 public:
@@ -43,7 +43,6 @@ public:
     void OnCleanup();
 };
 
-Emu chooseEmu(std::vector<Emu> emus, std::string path);
-void romSearch(const std::vector<Rom>& allRoms, std::vector<Rom>& menu, std::string searchString);
+Emu chooseEmu(std::vector<Emu> emus, const std::string& path);
 
 #endif // !WINDOW_H

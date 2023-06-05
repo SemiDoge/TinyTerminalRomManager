@@ -6,7 +6,6 @@
 #include <yaml-cpp/yaml.h>
 
 struct EmuStruct {
-    short id{};
     std::string name;
     std::string filename;
     std::vector<std::string> typeAssoc;
@@ -27,7 +26,6 @@ struct EmuStruct {
 };
 
 struct RomStruct {
-    short id{};
     std::string name;
     std::string filename;
     std::string type;
