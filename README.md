@@ -23,6 +23,7 @@ Usage:
   ttrm [OPTION...]
 
   -i, --index arg  INDEX Rom directory
+  -d, --depth arg  Index recursion MAX DEPTH, default = 3
   -v, --version    PRINT program version
   -h, --help       PRINT help text
 ```

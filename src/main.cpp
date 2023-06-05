@@ -9,18 +9,24 @@ void printVersion();
 //TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
 int main(int argc, char** argv) {
     spdlog::set_pattern("%^%l%$: %v");
+
+    #if defined(DEBUG)
+        spdlog::set_level(spdlog::level::debug);
+    #endif // DEBUG
+
     cxxopts::Options options("ttrm", 
         "A simple ncurses driven ROM manager, for all your emulation management needs!\nPlease use this tool with only legally obtained ROMS."
     );
 
     try {
         const auto optRes = setUpWorkflow(argc, argv, options);
-    } catch (cxxopts::exceptions::missing_argument error) {
-        spdlog::error("{}", error.what());
-        return EXIT_FAILURE;
-    } catch (cxxopts::exceptions::invalid_option_syntax error) {
-        spdlog::error("{}", error.what());
-        return EXIT_FAILURE;
+    } catch (...) {
+        try {
+            std::rethrow_exception(std::current_exception());
+        } catch (const std::exception& error) {
+            spdlog::error("{}", error.what());
+            return EXIT_FAILURE;
+        }
     }
 
     #ifdef RELEASE
@@ -66,9 +72,11 @@ int main(int argc, char** argv) {
 }
 
 cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & options) {
-    //TODO: Investigate an exception being thrown with invoking ttrm with --index flag, instead of -i.
+    int max_depth = 3;
+
     options.add_options()
         ("i,index", "INDEX Rom directory", cxxopts::value<std::string>())
+        ("d,depth", "Index recursion MAX DEPTH, default = 3", cxxopts::value<int>())
         ("v,version", "PRINT program version")
         ("h,help", "PRINT help text")
     ; 
@@ -83,6 +91,14 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
     if (static_cast<bool>(result.count("version"))) {
         printVersion();
         exit(EXIT_SUCCESS);
+    }
+
+    if (static_cast<bool>(result.count("depth"))) {
+        if (!static_cast<bool>(result.count("index"))) {
+            spdlog::warn("Depth option included without accompanying --index option. Ignored.");
+        } else {
+            max_depth = result["depth"].as<int>();
+        }
     }
 
     if (static_cast<bool>(result.count("index"))) {
@@ -110,7 +126,8 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
         std::vector<Rom> roms{};
         fs::path dirPath = expandTilde(dirToIndex);
         try {
-            index(emus, roms, dirPath);
+            spdlog::debug("Max recursion depth = {}", max_depth);
+            index(emus, roms, dirPath, 0, max_depth);
         } catch (fs::filesystem_error err) {
             spdlog::error("Could not index directory '{}', reason: {}", dirPath.string(), err.what());
             exit(EXIT_FAILURE);

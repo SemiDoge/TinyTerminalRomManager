@@ -17,8 +17,8 @@
 #define MAX_SEACH_STRING_LEN    30
 
 constexpr float __VER__MAJOR__ = 0;
-constexpr float __VER__MINOR__ = 4;
-constexpr float __VER__PATCH__ = 4;
+constexpr float __VER__MINOR__ = 5;
+constexpr float __VER__PATCH__ = 0;
 
 const std::string DEFAULT_CONFIG_ROMS_YAML = expandTilde("~/.config/TinyTermRomManager/roms.yaml");
 const std::string DEFAULT_CONFIG_EMUS_YAML = expandTilde("~/.config/TinyTermRomManager/emus.yaml");

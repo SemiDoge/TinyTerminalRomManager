@@ -133,18 +133,18 @@ std::vector<Rom> loadRomsFromConfig(const std::string& fileName) {
     return roms;
 }
 
-//TODO: Add a --depth switch to control the max depth of the recursion
-void index(std::vector<Emu>& emus, std::vector<Rom>& roms, const fs::path& dir, int depth) {
-    if(depth > 3) {
+void index(std::vector<Emu>& emus, std::vector<Rom>& roms, const fs::path& dir, int depth, int max_depth) {
+    if(depth > max_depth) {
         return;
     }
+
+    spdlog::info("Indexing: {}", dir.c_str());
 
     writeDirToRomConfig(emus, roms, dir);
 
     for (const auto& entry : fs::directory_iterator(dir)) {
         if (fs::is_directory(entry)) {
-            spdlog::info("Indexing: {}", entry.path().c_str());
-            index(emus, roms, entry, depth + 1);
+            index(emus, roms, entry, depth + 1, max_depth);
         } else if (fs::is_regular_file(entry)) {
             continue;
         }
