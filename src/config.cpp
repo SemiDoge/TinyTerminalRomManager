@@ -20,11 +20,11 @@ void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::st
     if (fs::exists(dirPath) && fs::is_directory(dirPath)) {
         for (const auto & file : fs::directory_iterator(dirPath)) {
             const fs::path& filePath = file.path();
-            const std::string extension = toUpper(extractExtension(filePath));
+            const std::string extension = toUpper(extractExtension(filePath.string()));
 
             for(const auto& ext : validExtensions) {
                 if(ext == extension) {
-                    std::string fullPath = fmt::format("{}{}", path, filePath.filename().c_str());
+                    std::string fullPath = fmt::format("{}{}", path, filePath.filename().string());
                     writeRomToConfig(emus, roms, fullPath);
                     break;
                 }
@@ -134,7 +134,7 @@ std::vector<Rom> loadRomsFromConfig(const std::string& fileName) {
 }
 
 void index(std::vector<Emu>& emus, std::vector<Rom>& roms, const fs::path& dir, int depth, int max_depth) {
-    if(depth > max_depth) {
+    if(depth >= max_depth) {
         return;
     }
 
