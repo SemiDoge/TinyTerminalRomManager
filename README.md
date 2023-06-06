@@ -1,5 +1,9 @@
 # **T**iny**T**erminal**R**om**M**anager - ttrm
 
+<p align="center">
+  <img src="./res/ttrmAltFringe.png" alt="The letters 'ttrm'">
+</p>
+
 ## **Disclaimer**
 TinyTerminalRomManger is a software application designed to help users organize and manage emulators and ROMs. It does not distribute or provide access to any copyrighted material, including ROMs, game files, or any other copyrighted content.
 
