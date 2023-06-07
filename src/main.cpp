@@ -163,12 +163,60 @@ void printRoms(std::vector<Rom>& roms) {
 }
 
 #ifdef _WIN32
-void startEmulator(const Emu & emu, const Rom& rom) {
-    (void) emu;
-    (void) rom;
+void startEmulator(const Emu& emu, const Rom& rom) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
 
-    spdlog::error("startEmulator() unimplemented");
-    exit(EXIT_FAILURE);
+    ZeroMemory(&si, sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+
+    std::string command = rom.emulator;
+    std::string arg = rom.filename;
+
+    std::vector<std::string> args{};
+
+    if (!emu.args.empty()) {
+        for(const auto& emuArgs: emu.args) {
+            if (emuArgs == "${FILENAME}") {
+                args.push_back(rom.filename);
+                continue;
+            }
+
+            args.push_back(emuArgs);
+        }
+    } else {
+        const std::string fileArg = expandTilde(arg);
+        args.push_back(fileArg);
+    }
+
+    std::string argString = " ";
+    for (const auto& arg: args) {
+        argString += fmt::format("\"{}\" ", arg);
+    }
+
+    bool success = false;
+    success = CreateProcess (
+        command.data(),
+        argString.data(),
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi 
+    );
+
+    if (success) {
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    } else {
+        spdlog::error("Could not call the emulator '{}' with args: [{}]", command, argString);
+        exit(EXIT_FAILURE);
+    }
+
+    return;
 }
 #elif __linux__
 void startEmulator(const Emu & emu, const Rom& rom) {

@@ -20,6 +20,7 @@ Menu::Menu(int height, int width, int start_row, int start_col,
 
 #ifdef _WIN32
     void Menu::OnInit(HANDLE stdout_hdl) {
+        this->stdout_hdl = stdout_hdl;
         CONSOLE_CURSOR_INFO cursorInfo;
 
         // Hide the cursor
@@ -29,18 +30,163 @@ Menu::Menu(int height, int width, int start_row, int start_col,
     }
 
     void Menu::OnExecute() {
-        spdlog::error("OnExecute() unimplemented");
-        exit(EXIT_FAILURE);
+        int chr;
+        Emu emu;
+        // MEVENT mEvent;
+
+        OnRender();
+
+        while (bRunning) {
+            chr = _getch();
+            switch (chr) {
+                case 72:
+                    MoveUp(UP_ARROW_STEP);
+                    break;
+                case 80:
+                    MoveDown(DOWN_ARROW_STEP);
+                    break;
+                case KEY_COMBO_CTRL_U:
+                    MoveUp(CTRL_U_STEP);
+                    break;
+                case KEY_COMBO_CTRL_D:
+                    MoveDown(CTRL_D_STEP);
+                    break;
+                // case KEY_MOUSE:
+                //     if (getmouse(&mEvent) == OK) {
+                //         if ((mEvent.bstate & BUTTON4_PRESSED) != 0) {
+                //             MoveUp(UP_ARROW_STEP);
+                //         } else if ((mEvent.bstate & BUTTON5_PRESSED) != 0) {
+                //             MoveDown(DOWN_ARROW_STEP);
+                //         }
+                //     }
+                //     break;
+                case 13:
+                    emu = chooseEmu(emus, menu_items[current_option].emulator);
+                    startEmulator(emu, menu_items[current_option]);
+                    bRunning = false;
+                    break;
+                case KEY_COMBO_CTRL_F:
+                case '/':
+                    SearchDriver();
+                    OnRender();
+                    break;
+                case KEY_ESCAPE:
+                    if(searchMode) {
+                        searchMode = false;
+                        scroll_offset = 0;
+                        current_option = 0;
+                        ResetMenu();
+                    }
+                    break;
+                case 'Q':
+                case 'q': 
+                    bRunning = false;
+                    break;
+                default:
+                    continue;
+            }
+
+            OnRender();
+        }
     }
 
     void Menu::OnCleanup() {
-        spdlog::error("OnCleanup() unimplemented");
-        exit(EXIT_FAILURE);
+        system("cls");
     }
 
     void Menu::OnRender() {
-        spdlog::error("OnRender() unimplemented");
-        exit(EXIT_FAILURE);
+        system("cls");
+
+        CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
+        GetConsoleScreenBufferInfo(stdout_hdl, &bufferInfo);
+        int maxyLines = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top + 1;
+
+        {
+            COORD pos = {0, 0};
+            SetConsoleCursorPosition(stdout_hdl, pos);
+            if(searchMode) {
+                fmt::print("Search: {} ({} results)\tPress ENTER to enter select mode. Press ESC to return to full listing.\n", searchString, menu_items.size());
+            } else {
+                #ifdef RELEASE
+                fmt::print("ROMs: {}\tSelected: {}", menu_items.size(), menu_items[current_option].name);
+                #elif defined(DEBUG)
+                fmt::print("ROMS: {} SEL: {}({}) MAXYLINES: {}\n", menu_items.size(), current_option, scroll_offset, maxyLines);
+                #endif
+            }
+        }
+
+        int endIndex = std::min(static_cast<int>(menu_items.size()), (maxyLines - 2) + scroll_offset);
+        for (int i = scroll_offset; i < endIndex; i++) {
+            if (i == current_option) {
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_BLUE | BACKGROUND_INTENSITY); // Highlight selected option
+            }
+
+            int lastSlash = static_cast<int>(menu_items[i].emulator.find_last_of("/\\"));
+            std::string emuString = menu_items[i].emulator.substr(lastSlash + 1);
+            std::string romString = fmt::format("[{:^5}] {} via {}", menu_items[i].type, menu_items[i].name, emuString);
+
+            COORD pos = {0, static_cast<short>(i - scroll_offset + NUM_NON_ENTRY_LINES)};
+            SetConsoleCursorPosition(stdout_hdl, pos);
+            fmt::print("{}\n", romString);
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); // Reset color
+        }
+    }
+
+    void Menu::MoveDown(int step) {
+        CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
+        GetConsoleScreenBufferInfo(stdout_hdl, &bufferInfo);
+        int maxVisibleLines = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top - NUM_NON_ENTRY_LINES;
+        int totalMenuItems = static_cast<int>(menu_items.size());
+
+        if (current_option + step >= totalMenuItems) {
+            current_option = totalMenuItems - 1;
+            scroll_offset = std::max(0, current_option - (maxVisibleLines - 1));
+            return;
+        }
+
+        if (current_option + step < maxVisibleLines + scroll_offset && current_option + step < totalMenuItems) {
+            current_option += step;
+        } else {
+            scroll_offset += step;
+            current_option += step;
+        } 
+    }
+
+    void Menu::SearchDriver() {
+        int sch = '\0';
+        searchMode = true;
+        scroll_offset  = 0;
+        current_option = 0;
+        searchString = "";
+
+        while((sch = _getch()) != 13) {
+            if(sch == KEY_ESCAPE) {
+                searchMode = false;
+                scroll_offset  = 0;
+                current_option = 0;
+                searchString = "";
+
+                ResetMenu();
+                break;
+            }
+
+            if((std::isalnum(sch)) != 0 || (std::ispunct(sch)) != 0 || sch == 8 || sch == KEY_SPACE) {
+                sch = tolower(sch);
+                if (sch == 8 /*KEY_BACKSPACE*/ && !searchString.empty()) {
+                    searchString.pop_back();
+                } else if (searchString.size() < MAX_SEACH_STRING_LEN && sch != 8) {
+                    searchString.push_back(static_cast<char>(sch));
+                }
+            }
+
+            if(!searchString.empty()) {
+                Search(searchString);
+            } else {
+                ResetMenu();
+            }
+
+            OnRender();
+        }
     }
 
     #elif __linux__
@@ -205,12 +351,16 @@ Menu::Menu(int height, int width, int start_row, int start_col,
 
 void Menu::MoveUp(int step) {
     if (current_option - step < 0) {
-        current_option = 0;
         scroll_offset = 0;
+        current_option = 0;
         return;
     }
 
-    if (scroll_offset > 0 && current_option - step - scroll_offset < 0) {
+    if (scroll_offset - step < 0) {
+        scroll_offset = 0;
+    }
+
+    if (scroll_offset > 0) {
         scroll_offset -= step;
     }
     

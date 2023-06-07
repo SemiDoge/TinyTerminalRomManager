@@ -4,6 +4,8 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <conio.h>
+#undef min
+#undef max
 #elif __linux__
 #include <ncurses.h>
 #endif // _WIN32
@@ -31,6 +33,10 @@ private:
     std::vector<Rom> menu_items;
     std::vector<Emu> emus;
     bool bRunning;
+
+    #ifdef _WIN32
+    HANDLE stdout_hdl; 
+    #endif // _WIN32
 
     bool searchMode;
     std::string searchString;
