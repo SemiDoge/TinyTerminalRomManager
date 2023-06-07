@@ -67,7 +67,7 @@ void Menu::OnExecute() {
                 break;
             case KEY_COMBO_CTRL_F:
             case '/':
-                Search();
+                SearchDriver();
                 OnRender();
                 break;
             case KEY_ESCAPE:
@@ -159,8 +159,7 @@ void Menu::ResetMenu() {
     std::copy(roms.begin(), roms.end(), std::back_inserter(menu_items));
 }
 
-
-void Menu::Search() {
+void Menu::SearchDriver() {
     int sch = '\0';
     searchMode = true;
     scroll_offset  = 0;
@@ -188,13 +187,20 @@ void Menu::Search() {
         }
 
         if(!searchString.empty()) {
-            romSearch(roms, menu_items, searchString);
+            Search(searchString);
         } else {
             ResetMenu();
         }
 
         OnRender();
     }
+}
+
+void Menu::Search(const std::string& searchString) {
+    std::vector<Rom> searchResult = fuzzySearch(roms, searchString, 83);
+    menu_items.clear();
+    menu_items.reserve(searchResult.size());
+    std::copy(searchResult.begin(), searchResult.end(), std::back_inserter(menu_items));
 }
 
 Emu chooseEmu(std::vector<Emu> emus, const std::string& path) {
@@ -206,4 +212,3 @@ Emu chooseEmu(std::vector<Emu> emus, const std::string& path) {
 
     return emus[0];
 }
-

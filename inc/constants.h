@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include "config.h"
+#include "utils.h"
 
 #define DEBUG
 #define NUM_NON_ENTRY_LINES     1
@@ -18,7 +18,7 @@
 
 constexpr float __VER__MAJOR__ = 0;
 constexpr float __VER__MINOR__ = 5;
-constexpr float __VER__PATCH__ = 0;
+constexpr float __VER__PATCH__ = 1;
 
 const std::string DEFAULT_CONFIG_ROMS_YAML = expandTilde("~/.config/TinyTermRomManager/roms.yaml");
 const std::string DEFAULT_CONFIG_EMUS_YAML = expandTilde("~/.config/TinyTermRomManager/emus.yaml");

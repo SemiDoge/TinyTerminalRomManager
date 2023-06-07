@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         const std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
         const std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
     #elif defined(DEBUG)
-        const std::string romsPath = "../config/test.yaml";
+        const std::string romsPath = "../config/roms.yaml";
         const std::string emuPath = "../config/emus.yaml";
     #endif
 
@@ -107,7 +107,7 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
             const std::string romsPath = DEFAULT_CONFIG_ROMS_YAML;
             const std::string emuPath =  DEFAULT_CONFIG_EMUS_YAML;
         #elif defined(DEBUG)
-            const std::string romsPath = "../config/test.yaml";
+            const std::string romsPath = "../config/roms.yaml";
             const std::string emuPath = "../config/emus.yaml";
         #endif
 

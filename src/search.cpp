@@ -63,10 +63,3 @@ std::vector<Rom> fuzzySearch(const std::vector<Rom>& roms, const std::string& se
 
     return results;
 }
-
-void romSearch(const std::vector<Rom>& allRoms, std::vector<Rom>& menu, const std::string& searchString) {
-    std::vector<Rom> searchResult = fuzzySearch(allRoms, searchString, 83);
-    menu.clear();
-    menu.reserve(searchResult.size());
-    std::copy(searchResult.begin(), searchResult.end(), std::back_inserter(menu));
-}

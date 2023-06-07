@@ -32,7 +32,8 @@ private:
     void OnRender();
     void MoveUp(int step);
     void MoveDown(int step);
-    void Search();
+    void SearchDriver();
+    void Search(const std::string& searchString);
     void ResetMenu();
 
 public:
