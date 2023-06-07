@@ -20,9 +20,12 @@ Menu::Menu(int height, int width, int start_row, int start_col,
 
 #ifdef _WIN32
     void Menu::OnInit(HANDLE stdout_hdl) {
-        (void) stdout_hdl;
-        spdlog::error("OnInit() unimplemented");
-        exit(EXIT_FAILURE);
+        CONSOLE_CURSOR_INFO cursorInfo;
+
+        // Hide the cursor
+        GetConsoleCursorInfo(stdout_hdl, &cursorInfo);
+        cursorInfo.bVisible = FALSE;
+        SetConsoleCursorInfo(stdout_hdl, &cursorInfo);
     }
 
     void Menu::OnExecute() {

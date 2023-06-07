@@ -55,9 +55,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
 endif()
 
-
-
-
 # main target
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
