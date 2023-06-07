@@ -64,7 +64,12 @@ int main(int argc, char** argv) {
     }
 
     Menu menu(static_cast<int>(roms.size()), 90, 0, 0, roms, emus);
+    #ifdef _WIN32
+    HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    menu.OnInit(stdoutHandle);
+    #elif __linux__
     menu.OnInit();
+    #endif // _WIN32
     menu.OnExecute();
     menu.OnCleanup();
        
@@ -157,6 +162,15 @@ void printRoms(std::vector<Rom>& roms) {
     }
 }
 
+#ifdef _WIN32
+void startEmulator(const Emu & emu, const Rom& rom) {
+    (void) emu;
+    (void) rom;
+
+    spdlog::error("startEmulator() unimplemented");
+    exit(EXIT_FAILURE);
+}
+#elif __linux__
 void startEmulator(const Emu & emu, const Rom& rom) {
     pid_t pid = fork();
 
@@ -197,3 +211,4 @@ void startEmulator(const Emu & emu, const Rom& rom) {
         return;
     }
 }
+#endif // _WIN32

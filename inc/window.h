@@ -1,10 +1,16 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <conio.h>
+#elif __linux__
+#include <ncurses.h>
+#endif // _WIN32
+
 #include <vector>
 #include <string>
 #include <iostream>
-#include <ncurses.h>
 #include <algorithm>
 #include <fmt/format.h>
 
@@ -39,7 +45,12 @@ private:
 public:
     Menu(int height, int width, int start_row, int start_col, const std::vector<Rom>& items, const std::vector<Emu>& emus);
 
+    #ifdef _WIN32
+    void OnInit(HANDLE stdout_hdl);
+    #elif __linux__
     void OnInit();
+    #endif // _WIN32
+
     void OnExecute();
     void OnCleanup();
 };
