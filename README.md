@@ -35,14 +35,14 @@ Usage:
 TinyTerminalRomManager requires a emulator configuration file to exist in the folder `~/.config/TinyTermRomManager/emus.yaml`.
 
 ### Workflow
-* Set up a directory with ROMs
-* Create a emulator configuration file
+1. Set up a directory with ROMs
+2. Create a emulator configuration file
   * Follow the sample below to guide you in creating this file
   * Save the file to `~/.config/TinyTermRomManager/emus.yaml`
-* Run `ttrm` with the `-i` switch and point it to that directory
+3. Run `ttrm` with the `-i` switch and point it to that directory
   * Example: `ttrm -i~/Roms/` or `ttrm --index=~/Roms/`
-* If it was successful it will tell you which directories it indexed and how many ROMs it detected.
-* Then you are all set! Just run `ttrm` without a switch and it will display the ROM menu.
+4. If it was successful it will tell you which directories it indexed and how many ROMs it detected.
+5. Then you are all set! Just run `ttrm` without a switch and it will display the ROM menu.
 
 
 ### `emus.yaml` sample
