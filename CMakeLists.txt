@@ -27,7 +27,7 @@ CPMAddPackage("gh:jbeder/yaml-cpp#yaml-cpp-0.7.0")
 CPMAddPackage("gh:jarro2783/cxxopts@3.1.1")
 CPMAddPackage("gh:gabime/spdlog@1.11.0")
 CPMAddPackage("gh:google/googletest@1.13.0")
-# also requires ncurses 
+# also requires ncurses for Linux
 
 #variables
 set (SOURCES 
@@ -49,16 +49,21 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set (LINKER_FLAGS
 
     )
+
+    # main target
+    add_executable(${PROJECT_NAME} ${SOURCES} ../res/resource.rc)
+    target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
+    target_link_libraries(${PROJECT_NAME} ${DEPS} ${LINKER_FLAGS})
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set (LINKER_FLAGS
         -lncurses
     )
-endif()
 
-# main target
-add_executable(${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
-target_link_libraries(${PROJECT_NAME} ${DEPS} ${LINKER_FLAGS})
+    # main target
+    add_executable(${PROJECT_NAME} ${SOURCES})
+    target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
+    target_link_libraries(${PROJECT_NAME} ${DEPS} ${LINKER_FLAGS})
+endif()
 
 # testing target
 # add_executable(${TEST_EXE_NAME} test/test.cpp ../src/utils.cpp)
