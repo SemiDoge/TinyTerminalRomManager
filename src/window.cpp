@@ -32,17 +32,16 @@ Menu::Menu(int height, int width, int start_row, int start_col,
     void Menu::OnExecute() {
         int chr;
         Emu emu;
-        // MEVENT mEvent;
 
         OnRender();
 
         while (bRunning) {
             chr = _getch();
             switch (chr) {
-                case 72:
+                case KEY_UP:
                     MoveUp(UP_ARROW_STEP);
                     break;
-                case 80:
+                case KEY_DOWN:
                     MoveDown(DOWN_ARROW_STEP);
                     break;
                 case KEY_COMBO_CTRL_U:
@@ -51,16 +50,7 @@ Menu::Menu(int height, int width, int start_row, int start_col,
                 case KEY_COMBO_CTRL_D:
                     MoveDown(CTRL_D_STEP);
                     break;
-                // case KEY_MOUSE:
-                //     if (getmouse(&mEvent) == OK) {
-                //         if ((mEvent.bstate & BUTTON4_PRESSED) != 0) {
-                //             MoveUp(UP_ARROW_STEP);
-                //         } else if ((mEvent.bstate & BUTTON5_PRESSED) != 0) {
-                //             MoveDown(DOWN_ARROW_STEP);
-                //         }
-                //     }
-                //     break;
-                case 13:
+                case KEY_ENTER:
                     emu = chooseEmu(emus, menu_items[current_option].emulator);
                     startEmulator(emu, menu_items[current_option]);
                     bRunning = false;
@@ -115,6 +105,7 @@ Menu::Menu(int height, int width, int start_row, int start_col,
             }
         }
 
+        // The -2 in (maxyLines - 2) prevents the terminal scroll bar from appearing and messing up the placement of the rom strings
         int endIndex = std::min(static_cast<int>(menu_items.size()), (maxyLines - 2) + scroll_offset);
         for (int i = scroll_offset; i < endIndex; i++) {
             if (i == current_option) {
@@ -159,7 +150,7 @@ Menu::Menu(int height, int width, int start_row, int start_col,
         current_option = 0;
         searchString = "";
 
-        while((sch = _getch()) != 13) {
+        while((sch = _getch()) != KEY_ENTER) {
             if(sch == KEY_ESCAPE) {
                 searchMode = false;
                 scroll_offset  = 0;
@@ -170,11 +161,11 @@ Menu::Menu(int height, int width, int start_row, int start_col,
                 break;
             }
 
-            if((std::isalnum(sch)) != 0 || (std::ispunct(sch)) != 0 || sch == 8 || sch == KEY_SPACE) {
+            if((std::isalnum(sch)) != 0 || (std::ispunct(sch)) != 0 || sch == KEY_BACKSPACE || sch == KEY_SPACE) {
                 sch = tolower(sch);
-                if (sch == 8 /*KEY_BACKSPACE*/ && !searchString.empty()) {
+                if (sch == KEY_BACKSPACE && !searchString.empty()) {
                     searchString.pop_back();
-                } else if (searchString.size() < MAX_SEACH_STRING_LEN && sch != 8) {
+                } else if (searchString.size() < MAX_SEACH_STRING_LEN && sch != KEY_BACKSPACE) {
                     searchString.push_back(static_cast<char>(sch));
                 }
             }
@@ -360,7 +351,7 @@ void Menu::MoveUp(int step) {
         scroll_offset = 0;
     }
 
-    if (scroll_offset > 0) {
+    if (scroll_offset > 0 && current_option - step - scroll_offset < 0) {
         scroll_offset -= step;
     }
     
