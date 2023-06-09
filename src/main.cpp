@@ -5,8 +5,6 @@ void printVersion();
 
 
 //TODO: Set up testing
-//TODO: Save file management? After above stuff is finished
-//TODO: Idea: for save file management maybe I can let saves be saved to the RomManager dir and then copy to desired folder
 int main(int argc, char** argv) {
     spdlog::set_pattern("%^%l%$: %v");
 

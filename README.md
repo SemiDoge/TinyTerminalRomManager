@@ -21,6 +21,17 @@ TinyTerminalRomManger is a software application designed to help users organize 
 
 ## Getting Started
 
+### Build
+``` console
+./build.[sh/bat]
+
+```
+
+### Run
+``` console
+./run.[sh/bat] or build/ttrm[.exe]
+```
+
 ### Usage
 ```console
 Usage:

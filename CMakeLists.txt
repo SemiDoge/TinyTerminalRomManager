@@ -52,8 +52,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     # main target
     add_executable(${PROJECT_NAME} ${SOURCES} ../res/resource.rc)
-    target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
-    target_link_libraries(${PROJECT_NAME} ${DEPS} ${LINKER_FLAGS})
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set (LINKER_FLAGS
         -lncurses
@@ -61,9 +59,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     # main target
     add_executable(${PROJECT_NAME} ${SOURCES})
-    target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
-    target_link_libraries(${PROJECT_NAME} ${DEPS} ${LINKER_FLAGS})
 endif()
+
+target_include_directories(${PROJECT_NAME} PUBLIC ../inc/)
+target_link_libraries(${PROJECT_NAME} ${DEPS} ${LINKER_FLAGS})
 
 # testing target
 # add_executable(${TEST_EXE_NAME} test/test.cpp ../src/utils.cpp)
