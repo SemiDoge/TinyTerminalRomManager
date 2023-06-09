@@ -121,9 +121,9 @@ void index(std::vector<Emu>& emus, std::vector<Rom>& roms, const fs::path& dir, 
         return;
     }
 
-    spdlog::info("Indexing: {}", dir.c_str());
+    spdlog::info("Indexing: {}", dir.string());
 
-    writeDirToRomConfig(emus, roms, dir);
+    writeDirToRomConfig(emus, roms, dir.string());
 
     for (const auto& entry : fs::directory_iterator(dir)) {
         if (fs::is_directory(entry)) {

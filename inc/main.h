@@ -1,12 +1,18 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <conio.h>
+#elif __linux__
+#include <ncurses.h>
+#endif // _WIN32
+
 #include <fmt/format.h>
 #include <fmt/color.h>
 #include <vector>
 #include <iostream>
 #include <cxxopts.hpp>
-#include <ncurses.h>
 #include <spdlog/spdlog.h>
 #include <filesystem>
 

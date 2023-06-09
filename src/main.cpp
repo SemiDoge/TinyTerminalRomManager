@@ -64,7 +64,12 @@ int main(int argc, char** argv) {
     }
 
     Menu menu(static_cast<int>(roms.size()), 90, 0, 0, roms, emus);
+    #ifdef _WIN32
+    HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    menu.OnInit(stdoutHandle);
+    #elif __linux__
     menu.OnInit();
+    #endif // _WIN32
     menu.OnExecute();
     menu.OnCleanup();
        
@@ -157,6 +162,63 @@ void printRoms(std::vector<Rom>& roms) {
     }
 }
 
+#ifdef _WIN32
+void startEmulator(const Emu& emu, const Rom& rom) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+
+    std::string command = rom.emulator;
+    std::string arg = rom.filename;
+
+    std::vector<std::string> args{};
+
+    if (!emu.args.empty()) {
+        for(const auto& emuArgs: emu.args) {
+            if (emuArgs == "${FILENAME}") {
+                args.push_back(rom.filename);
+                continue;
+            }
+
+            args.push_back(emuArgs);
+        }
+    } else {
+        const std::string fileArg = expandTilde(arg);
+        args.push_back(fileArg);
+    }
+
+    std::string argString = " ";
+    for (const auto& arg: args) {
+        argString += fmt::format("\"{}\" ", arg);
+    }
+
+    bool success = false;
+    success = CreateProcess (
+        command.data(),
+        argString.data(),
+        NULL,
+        NULL,
+        FALSE,
+        0,
+        NULL,
+        NULL,
+        &si,
+        &pi 
+    );
+
+    if (success) {
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    } else {
+        spdlog::error("Could not call the emulator '{}' with args: [{}]", command, argString);
+        exit(EXIT_FAILURE);
+    }
+
+    return;
+}
+#elif __linux__
 void startEmulator(const Emu & emu, const Rom& rom) {
     pid_t pid = fork();
 
@@ -197,3 +259,4 @@ void startEmulator(const Emu & emu, const Rom& rom) {
         return;
     }
 }
+#endif // _WIN32
