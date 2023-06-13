@@ -6,8 +6,10 @@
 #include <conio.h>
 #undef min
 #undef max
+#define TTRM_GETMAXY getMaxY
 #elif __linux__
 #include <ncurses.h>
+#define TTRM_GETMAXY getmaxy
 #endif // _WIN32
 
 #include <vector>
@@ -62,5 +64,7 @@ public:
 };
 
 Emu chooseEmu(std::vector<Emu> emus, const std::string& path);
-
+#ifdef _WIN32
+int getMaxY(HANDLE stdout_hdl);
+#endif // _WIN32
 #endif // !WINDOW_H

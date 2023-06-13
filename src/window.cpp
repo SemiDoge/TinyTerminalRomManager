@@ -90,6 +90,7 @@ Menu::Menu(int height, int width, int start_row, int start_col,
         CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
         GetConsoleScreenBufferInfo(stdout_hdl, &bufferInfo);
         int maxyLines = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top + 1;
+        // int maxyLines = TTRM_GETMAXY(stdout_hdl) + 1;
 
         {
             COORD pos = {0, 0};
@@ -121,26 +122,6 @@ Menu::Menu(int height, int width, int start_row, int start_col,
             fmt::print("{}\n", romString);
             SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); // Reset color
         }
-    }
-
-    void Menu::MoveDown(int step) {
-        CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
-        GetConsoleScreenBufferInfo(stdout_hdl, &bufferInfo);
-        int maxVisibleLines = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top - NUM_NON_ENTRY_LINES;
-        int totalMenuItems = static_cast<int>(menu_items.size());
-
-        if (current_option + step >= totalMenuItems) {
-            current_option = totalMenuItems - 1;
-            scroll_offset = std::max(0, current_option - (maxVisibleLines - 1));
-            return;
-        }
-
-        if (current_option + step < maxVisibleLines + scroll_offset && current_option + step < totalMenuItems) {
-            current_option += step;
-        } else {
-            scroll_offset += step;
-            current_option += step;
-        } 
     }
 
     void Menu::SearchDriver() {
@@ -256,7 +237,8 @@ Menu::Menu(int height, int width, int start_row, int start_col,
 
     void Menu::OnRender() {
         wclear(stdscr);
-        int maxyLines = getmaxy(stdscr) - NUM_NON_ENTRY_LINES;
+        // int maxyLines = getmaxy(stdscr) - NUM_NON_ENTRY_LINES;
+        int maxyLines = TTRM_GETMAXY(stdscr) - NUM_NON_ENTRY_LINES;
 
         if(searchMode) {
             mvprintw(0, 0, "Search: %s (%ld results)\tPress ENTER to enter select mode. Press ESC to return to full listing.", searchString.c_str(), menu_items.size());
@@ -282,24 +264,6 @@ Menu::Menu(int height, int width, int start_row, int start_col,
             wrefresh(stdscr);
             attroff(A_REVERSE);
         }
-    }
-
-    void Menu::MoveDown(int step) {
-        int maxVisibleLines = getmaxy(stdscr) - NUM_NON_ENTRY_LINES;
-        int totalMenuItems = static_cast<int>(menu_items.size());
-
-        if (current_option + step >= totalMenuItems) {
-            current_option = totalMenuItems - 1;
-            scroll_offset = std::max(0, current_option - (maxVisibleLines - 1));
-            return;
-        }
-        
-        if (current_option + step < maxVisibleLines + scroll_offset && current_option + step < totalMenuItems) {
-            current_option += step;
-        } else {
-            scroll_offset += step;
-            current_option += step;
-        } 
     }
 
     void Menu::SearchDriver() {
@@ -358,6 +322,29 @@ void Menu::MoveUp(int step) {
     current_option -= step;
 }
 
+void Menu::MoveDown(int step) {
+    #ifdef _WIN32
+    int maxVisibleLines = TTRM_GETMAXY(stdout_hdl) - NUM_NON_ENTRY_LINES;
+    #elif __linux__
+    int maxVisibleLines = TTRM_GETMAXY(stdscr) - NUM_NON_ENTRY_LINES;
+    #endif // _WIN32
+
+    int totalMenuItems = static_cast<int>(menu_items.size());
+
+    if (current_option + step >= totalMenuItems) {
+        current_option = totalMenuItems - 1;
+        scroll_offset = std::max(0, current_option - (maxVisibleLines - 1));
+        return;
+    }
+    
+    if (current_option + step < maxVisibleLines + scroll_offset && current_option + step < totalMenuItems) {
+        current_option += step;
+    } else {
+        scroll_offset += step;
+        current_option += step;
+    } 
+}
+
 void Menu::ResetMenu() {
     menu_items.clear();
     menu_items.reserve(roms.size());
@@ -380,3 +367,12 @@ Emu chooseEmu(std::vector<Emu> emus, const std::string& path) {
 
     return emus[0];
 }
+
+
+#ifdef _WIN32
+int getMaxY(HANDLE stdout_hdl) {
+    CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
+    GetConsoleScreenBufferInfo(stdout_hdl, &bufferInfo);
+    return (int) bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top;
+}
+#endif // _WIN32
