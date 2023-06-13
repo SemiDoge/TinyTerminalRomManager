@@ -137,9 +137,14 @@ cxxopts::ParseResult setUpWorkflow(int argc, char** argv, cxxopts::Options & opt
         }
 
         writeRomConfigToFile(roms, romsPath);
-
         spdlog::info("Finished indexing {}", dirToIndex);
-        spdlog::info("Roms found: {}", roms.size());
+
+        if (roms.empty()) {
+            spdlog::warn("No ROMs found, have you properly set up the emus.yaml config file?");
+        } else {
+            spdlog::info("Roms found: {}", roms.size());
+        }
+
         exit(EXIT_SUCCESS);
     }
 
@@ -233,6 +238,7 @@ void startEmulator(const Emu & emu, const Rom& rom) {
         args.push_back(const_cast<char*>(command.c_str()));
 
         // TODO: This should check that if emu.args.size() > 0, ${FILENAME} ought to be in the emu args array
+        // TODO: Investigate what this does when no ${FILENAME} is provided
         if (!emu.args.empty()) {
             for(const auto& emuArgs : emu.args) {
                 if (emuArgs == "${FILENAME}") {

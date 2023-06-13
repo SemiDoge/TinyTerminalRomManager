@@ -12,7 +12,6 @@
 
 namespace fs = std::filesystem;
 
-void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path);
 void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, const std::string& path);
 void writeRomConfigToFile(std::vector<Rom>& roms, std::string path);
 void writeEmuConfigToFile(std::vector<Emu>& emus, std::string path);

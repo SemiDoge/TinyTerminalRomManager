@@ -1,37 +1,6 @@
 #include "../inc/config.h"
 #include "../inc/constants.h"
 
-void writeDirToRomConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, std::string path) {
-    fs::path dirPath = path;
-    std::unordered_set<std::string> validExtensions{};
-
-    if(fs::is_directory(dirPath) && path[path.size()-1] != '/') {
-        path.push_back('/');
-        dirPath = path;
-    }
-
-    for(const auto& emu : emus) {
-        for(const auto& ext: emu.typeAssoc) {
-            validExtensions.insert(toUpper(ext));
-        }
-    }
-
-    if (fs::exists(dirPath) && fs::is_directory(dirPath)) {
-        for (const auto & file : fs::directory_iterator(dirPath)) {
-            const fs::path& filePath = file.path();
-            const std::string extension = toUpper(extractExtension(filePath.string()));
-
-            for(const auto& ext : validExtensions) {
-                if(ext == extension) {
-                    std::string fullPath = fmt::format("{}{}", path, filePath.filename().string());
-                    writeRomToConfig(emus, roms, fullPath);
-                    break;
-                }
-            }
-        }
-    }
-}
-
 void writeRomToConfig(std::vector<Emu>& emus, std::vector<Rom>& roms, const std::string& path) {
     size_t lastSlash = path.find_last_of("/\\");
     size_t lastDot = path.find_last_of('.');
@@ -81,7 +50,7 @@ std::vector<Emu> loadEmusFromConfig(const std::string& fileName) {
         newEmu.name = entry["name"].as<std::string>();
         newEmu.type = entry["type"].as<std::string>();
         newEmu.filename = entry["path"].as<std::string>();
-        // Need a way of creating an error if filename doesn't exist in emu config file.
+        //TODO: Need a way of creating an error if filename doesn't exist in emu config file.
 
         const YAML::Node& extensionNode = entry["extension"];
         for (const YAML::Node& node : extensionNode) {
@@ -117,19 +86,32 @@ std::vector<Rom> loadRomsFromConfig(const std::string& fileName) {
 }
 
 void index(std::vector<Emu>& emus, std::vector<Rom>& roms, const fs::path& dir, int depth, int max_depth) {
-    if(depth >= max_depth) {
+    if (depth >= max_depth) {
         return;
     }
 
-    spdlog::info("Indexing: {}", dir.string());
+    spdlog::info("Indexing -> {}", dir.string());
 
-    writeDirToRomConfig(emus, roms, dir.string());
+    //TODO: This is called every directory, consider caching by doing this outside of index()
+    std::unordered_set<std::string> validExtensions{};
+    for(const auto& emu : emus) {
+        for(const auto& ext: emu.typeAssoc) {
+            validExtensions.insert(toUpper(ext));
+        }
+    }
 
     for (const auto& entry : fs::directory_iterator(dir)) {
         if (fs::is_directory(entry)) {
             index(emus, roms, entry, depth + 1, max_depth);
         } else if (fs::is_regular_file(entry)) {
-            continue;
+            const std::string extension = toUpper(extractExtension(entry.path().string()));
+
+            for(const auto& ext : validExtensions) {
+                if(ext == extension) {
+                    writeRomToConfig(emus, roms, entry.path().string());
+                    break;
+                }
+            }
         }
     }
 }
