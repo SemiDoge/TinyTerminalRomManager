@@ -17,7 +17,13 @@ TinyTerminalRomManger is a software application designed to help users organize 
 
 ## Limitations
 
-`ttrm` doesn't play well with more than one emulator whose ROMs use the file extension `.iso`. As it uses the file extension to determine which emulator to invoke.
+`ttrm` doesn't play well with more than one emulator whose ROMs use the same file extension, as it uses the file extension to determine which emulator to invoke.
+
+## Demonstration
+<p align="center">
+  <img src="./res/ttrmDemo.gif" alt="A short demo of the program.">
+</p>
+
 
 ## Getting Started
 
