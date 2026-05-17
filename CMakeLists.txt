@@ -22,11 +22,11 @@ endif()
 #add deps
 include(cmake/CPM.cmake)
 
-CPMAddPackage("gh:fmtlib/fmt#9.1.0")
-CPMAddPackage("gh:jbeder/yaml-cpp#yaml-cpp-0.7.0")
-CPMAddPackage("gh:jarro2783/cxxopts@3.1.1")
-CPMAddPackage("gh:gabime/spdlog@1.11.0")
-CPMAddPackage("gh:google/googletest@1.13.0")
+CPMAddPackage("gh:fmtlib/fmt#12.1.0")
+CPMAddPackage("gh:jbeder/yaml-cpp#yaml-cpp-0.9.0")
+CPMAddPackage("gh:jarro2783/cxxopts@3.3.1")
+CPMAddPackage("gh:gabime/spdlog@1.17.0")
+CPMAddPackage("gh:google/googletest@1.17.0")
 # also requires ncurses for Linux
 
 #variables
